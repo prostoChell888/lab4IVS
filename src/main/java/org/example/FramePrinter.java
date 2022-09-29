@@ -14,12 +14,13 @@ public class FramePrinter {
 
         // Панель содержимого
         Container container = frame.getContentPane();
+        container.removeAll();
         // Устанавливаем менеджер последовательного расположения
         container.setLayout(new GridLayout
                 (2, 0, 10, 50));
 
         JLabel jl = new JLabel("Выбирите файл");
-        JButton buttonOpen = ButtomFactory.createButtonOpen();
+        JButton buttonOpen = ButtomFactory.createButtonOpen(frame);
         JLabel status = new JLabel(fileStatus);
 
         container.add(jl);
