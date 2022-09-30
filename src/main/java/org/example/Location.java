@@ -66,13 +66,13 @@ public class Location {
 
 
     //
-    public double getTimeInHours() throws Exception {
+    public double getTimeInHours() {
         if ("".equals(time)){
             return 0;
         }
-        double timeInHours = Double.parseDouble(time.substring(1));
-        timeInHours += Double.parseDouble(time.substring(1, 3)) /60;
-        timeInHours += Double.parseDouble(time.substring(3, 5)) /360;
+        double timeInHours = Double.parseDouble(time.substring(0, 2));
+        timeInHours += Double.parseDouble(time.substring(2, 4)) / 60;
+        timeInHours += Double.parseDouble(time.substring(4, 6)) / 360;
 
         return timeInHours;
     }

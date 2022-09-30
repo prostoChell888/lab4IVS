@@ -22,7 +22,7 @@ public class ButtomFactory {
                         File chosenFile = jC.getSelectedFile();
                         List<Location> listWithCoordinates =
                                 CordParser.parseTxtFile(chosenFile);
-                        FramePrinter.printTableWindow(listWithCoordinates);
+                        FramePrinter.printTableWindow(frame, listWithCoordinates);
 
                     }catch (Exception e) {
                         FramePrinter.printDownloudWindow(frame, e.getMessage());
