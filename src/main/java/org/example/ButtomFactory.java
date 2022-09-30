@@ -65,12 +65,12 @@ public class ButtomFactory {
         Font font = new Font("Verdana", Font.PLAIN, 18);
 
         String[] items = {
-                "Направление",
-                "Время",
-                "Широта",
-                "Долгота",
-                "Высота",
-                "скорость"
+                "Направление (градусы)",
+                "Время (часы)",
+                "Широта (градусы)",
+                "Долгота (градусы)",
+                "Высота (градусы)",
+                "скорость (км/ч)"
         };
 
         ActionListener actionListener = e -> {
