@@ -123,7 +123,6 @@ public class FramePrinter {
             (JFrame frame, List<Double> listXAxis,
              List<Double> listYAxis, StringBuilder nameOfXAxis,
              StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
-
         Container container = frame.getContentPane();
         container.removeAll();
         container.setLayout(new BorderLayout());
