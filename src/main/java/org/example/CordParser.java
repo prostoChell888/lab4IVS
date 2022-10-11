@@ -13,7 +13,6 @@ public class CordParser {
 
         List<Location> listOfLocations = new ArrayList<>();
 
-
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
@@ -36,8 +35,6 @@ public class CordParser {
         String bufLine;
 
         while ((bufLine = br.readLine()) != null) {
-
-
             String[] arrInfisticInStr = bufLine.split(",");
             bufLocation = parseStrToCord(arrInfisticInStr);
             listOfLocations.add(bufLocation);

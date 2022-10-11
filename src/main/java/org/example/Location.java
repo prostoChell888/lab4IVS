@@ -9,10 +9,10 @@ public class Location {
     String time = "";//XXXXXX(6 цифр) XX(Часы)XX(Минуты)XX (Секунды)!!!!
 
     String latitude = ""; // Значение широты (разделить на 100)!!!!
-    String n_s = "";//N: Север, S: Юг
+    char n_s = ' ';//N: Север, S: Юг
 
     String longitude = "";//Значение долготы (разделить на 100)!!!!
-    String e_v = "";// E: Восток, W: Запад
+    char e_v = ' ';// E: Восток, W: Запад
 
     String speed = ""; //Значение скорости (км/ч)!!!!
     String course = ""; //Значение направления(градусы)!!!!
@@ -40,7 +40,7 @@ public class Location {
     }
 
     public void setN_s(String n_s) {
-        this.n_s = n_s;
+        this.n_s = n_s.charAt(0);
     }
 
     public void setLongitude(String longitude) {
@@ -48,7 +48,7 @@ public class Location {
     }
 
     public void setE_v(String e_v) {
-        this.e_v = e_v;
+        this.e_v = e_v.charAt(0);
     }
 
     public void setSpeed(String speed) {
@@ -128,7 +128,7 @@ public class Location {
         return latitude;
     }
 
-    public String getN_s() {
+    public char getN_s() {
         return n_s;
     }
 
@@ -136,7 +136,7 @@ public class Location {
         return longitude;
     }
 
-    public String getE_v() {
+    public char getE_v() {
         return e_v;
     }
 
