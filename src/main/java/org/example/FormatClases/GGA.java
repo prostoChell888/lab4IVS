@@ -1,7 +1,7 @@
 package org.example.FormatClases;
 
 public class GGA {
-    private Double TimeUTCInHours;//распарсить в часы
+    private String TimeUTC;//распарсить в часы
     private Double latitude; //распрсить
     private Character indicatorNS;
     private Double longitude;
@@ -26,15 +26,17 @@ public class GGA {
         return latitudeInDegrees;
     }
 
-    public Double getTimeUTCInHours() {
-        return TimeUTCInHours;
+    public String getTimeUTC() {
+        return TimeUTC;
     }
 
     public void setTimeUTC(String timeUTCStr) {
         if (timeUTCStr.equals("")) return;
-        TimeUTCInHours = Double.parseDouble(timeUTCStr.substring(0, 2)) + 3;
-        TimeUTCInHours += Double.parseDouble(timeUTCStr.substring(2, 4)) / 60;
-        TimeUTCInHours += Double.parseDouble(timeUTCStr.substring(4, 6)) / 360;
+
+        var sb = new StringBuilder(timeUTCStr);
+        sb.insert(2, ':');
+        sb.insert(5, ':');
+        this.TimeUTC = sb.toString();
     }
 
     public Double getLatitude() {
