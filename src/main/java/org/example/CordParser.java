@@ -36,12 +36,12 @@ public class CordParser {
 
         while ((bufLine = br.readLine()) != null) {
             String[] arrInfisticInStr = bufLine.split(",");
-            bufLocation = parseStrToCord(arrInfisticInStr);
+            bufLocation = parseREPORT(arrInfisticInStr);
             listOfLocations.add(bufLocation);
         }
     }
 
-    private static Location parseStrToCord(String[] arrInfisticInStr) {
+    private static Location parseREPORT(String[] arrInfisticInStr) {
         Location bufLocation;
         bufLocation = new Location();
 
@@ -63,5 +63,8 @@ public class CordParser {
 
         return bufLocation;
     }
+
+
+
 }
 

@@ -5,10 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 
 public class DBConector {
-
-
     public void addInfoFromRafFile(File file) throws Exception {
-
 
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -18,13 +15,9 @@ public class DBConector {
 
 
             }
-
-
         } catch (Exception ex) {
-            throw new Exception("Ошибка преобразования файла\n" +
-                    ex.getMessage());
+            throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
         }
-
     }
 
     private static boolean getFormatsFromBuffer(BufferedReader br, Standarts standarts) throws Exception {
@@ -41,18 +34,19 @@ public class DBConector {
         return bufString != null;
     }
 
-    private static boolean getStrWithFormat(Standarts standarts, String bufString, boolean f, int startOfStandartStr) throws Exception {
+    private static boolean getStrWithFormat(Standarts standarts, String bufString, boolean f, int startOfStandardStr)
+            throws Exception {
         String[] arrOfLocationDataInStrings;
-        arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split(",");
+        arrOfLocationDataInStrings = bufString.substring(startOfStandardStr).split(",");
         switch (arrOfLocationDataInStrings[0]) {
             case "$GPGGA":
-                ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings, standarts.gga);break;
+                standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
             case "$GPGSV":
-                ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings, standarts.gsv);break;
+                standarts.gsv.add(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
             case "$GPGSA":
-                ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings, standarts.gsa);break;
+                standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
             case "$GPRMC":
-                ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings, standarts.rmc);
+                standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                 f = false;
                 break;
             default: throw new Exception("Ошибка считывания файла");

@@ -57,7 +57,7 @@ public class FramePrinter {
         JTable table = getjTable(listWithCoordinates);
         JScrollPane scrollPane = new JScrollPane(table);
         container.add(scrollPane, BorderLayout.CENTER);
-        //container.add(scrollPane);
+
 
         List<Double> listXAxis = new ArrayList<>();
         List<Double> listYAxis = new ArrayList<>();
@@ -72,7 +72,7 @@ public class FramePrinter {
         JButton graphButton = ButtomFactory.createGraphButton(frame, listXAxis, listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
 
 
-        //var boxLayout = ;
+
         JPanel grid = new JPanel(new GridLayout(6, 1, 0, 5));
 
         grid.add(loadFileButton);

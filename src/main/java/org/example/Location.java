@@ -70,7 +70,7 @@ public class Location {
         if ("".equals(time)){
             return 0;
         }
-        double timeInHours = Double.parseDouble(time.substring(0, 2));
+        double timeInHours = Double.parseDouble(time.substring(0, 2)) + 3;
         timeInHours += Double.parseDouble(time.substring(2, 4)) / 60;
         timeInHours += Double.parseDouble(time.substring(4, 6)) / 360;
 

@@ -86,7 +86,7 @@ public class GSV {
         return gsVinfList;
     }
 
-    public void addGsVinfList(GSVinf gsVinfList) {
+    public void addGsVinf(GSVinf gsVinfList) {
         this.gsVinfList.add(gsVinfList);
     }
 }
