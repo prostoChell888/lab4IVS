@@ -5,6 +5,8 @@ import org.example.FormatClases.GSA;
 import org.example.FormatClases.GSV;
 import org.example.FormatClases.RMC;
 
+import java.util.logging.Logger;
+
 public class ParserCordFormats {
 
 
@@ -23,26 +25,29 @@ public class ParserCordFormats {
         gga.setUnits2(data[11]);
         gga.setAgeOfDiffCorr(data[12]);
         gga.setDiffrefstationID(data[13]);
-        gga.setChecksum(data[14]);
 
         return gga;
     }
 
 
-
-
-    static public GSA GSA_Parser(String[] data) {
+    static public GSA GSA_Parser(String[] data) throws Exception {
+        Integer i = 0;
         var gsa = new GSA();
-        gsa.setMode1(data[1]);
-        gsa.setMode2(data[2]);
-        int i;
-        for(i = 3; !data[i].contains("."); i++){
+        try {
 
-            gsa.addSatelliteUsed(data[i]);
+            gsa.setMode1(data[1]);
+            gsa.setMode2(data[2]);
+
+            for (i = 3; !data[i].contains("."); i++) {
+
+                gsa.addSatelliteUsed(data[i]);
+            }
+            gsa.setPDOP(data[i++]);
+            gsa.setHDOP(data[i++]);
+            gsa.setVDOP(data[i]);
+        } catch (Exception ex) {
+            throw new Exception("Ошибка на индексе" + i);
         }
-        gsa.setPDOP(data[i++]);
-        gsa.setHDOP(data[i++]);
-        gsa.setVDOP(data[i]);
 
         return gsa;
     }
@@ -69,7 +74,16 @@ public class ParserCordFormats {
     static public RMC RMC_Parser(String[] data) {
         var rmc = new RMC();
 
-
+        rmc.setTimeUTC(data[1]);
+        rmc.setStatus(data[2]);
+        rmc.setLatitude(data[3]);
+        rmc.setIndicatorNS(data[4]);
+        rmc.setLongitude(data[5]);
+        rmc.setIndicatorEW(data[6]);
+        rmc.setSpeedOverGround(data[7]);
+        rmc.setCourseOverGround(data[8]);
+        rmc.setDate(data[9]);
+        rmc.setMagneticVariation(data[10]);
 
         return rmc;
     }

@@ -13,9 +13,9 @@ public class GGA {
     private Character units1;
     private Double geoidSeparation1;
     private Character units2;
-    private Integer ageOfDiffCorr;
+    private String ageOfDiffCorr;
     private Integer diffrefstationID;
-    private Integer checksum;
+
 
     private double strToDegree(String value) {
         if ("".equals(value))
@@ -81,7 +81,7 @@ public class GGA {
 
     public void setPositionFixIndicator(String positionFixIndicator) {
         if (positionFixIndicator.equals("")) return;
-        this.positionFixIndicator = Integer.getInteger(positionFixIndicator);
+        this.positionFixIndicator = Integer.parseInt(positionFixIndicator);
     }
 
     public Integer getSatellitesUsed() {
@@ -90,7 +90,7 @@ public class GGA {
 
     public void setSatellitesUsed(String satellitesUsed) {
         if (satellitesUsed.equals("")) return;
-        this.satellitesUsed = Integer.getInteger(satellitesUsed);
+        this.satellitesUsed = Integer.parseInt(satellitesUsed);
     }
 
     public Double getHDOP() {
@@ -138,13 +138,13 @@ public class GGA {
         this.units2 = units2.charAt(0);
     }
 
-    public Integer getAgeOfDiffCorr() {
+    public String getAgeOfDiffCorr() {
         return ageOfDiffCorr;
     }
 
     public void setAgeOfDiffCorr(String ageOfDiffCorr) {
         if (ageOfDiffCorr.equals("")) return;
-        this.ageOfDiffCorr = Integer.getInteger(ageOfDiffCorr);
+        this.ageOfDiffCorr = ageOfDiffCorr;
     }
 
     public Integer getDiffrefstationID() {
@@ -153,15 +153,8 @@ public class GGA {
 
     public void setDiffrefstationID(String diffrefstationID) {
         if (diffrefstationID.equals("")) return;
-        this.diffrefstationID = Integer.getInteger(diffrefstationID);
+        this.diffrefstationID = Integer.parseInt(diffrefstationID);
     }
 
-    public Integer getChecksum() {
-        return checksum;
-    }
 
-    public void setChecksum(String checksum) {
-        if (checksum.equals("")) return;
-        this.checksum = Integer.getInteger(checksum);
-    }
 }

@@ -1,11 +1,12 @@
 package org.example.FormatClases;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GSA {
     Character Mode1;
     Integer Mode2;
-    List<Integer> SatelliteUsed;
+    List<Integer> SatelliteUsed = new ArrayList<>();
     Double PDOP;
     Double HDOP;
     Double VDOP;
@@ -26,7 +27,7 @@ public class GSA {
 
     public void setMode2(String mode2) {
         if (mode2.equals("")) return;
-        Mode2 = Integer.getInteger(mode2);
+        Mode2 = Integer.parseInt(mode2);
     }
 
     public List<Integer> getSatelliteUsed() {
@@ -71,6 +72,6 @@ public class GSA {
 
     public void setChecksum(String checksum) {
         if (checksum.equals("")) return;
-        this.checksum = Integer.getInteger(checksum);
+        this.checksum = Integer.parseInt(checksum);
     }
 }

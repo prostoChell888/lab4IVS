@@ -124,6 +124,6 @@ public class RMC {
 
     public void setChecksum(String checksum) {
         if (checksum.equals("")) return;
-        this.checksum = Integer.getInteger(checksum);
+        this.checksum = Integer.parseInt(checksum);
     }
 }
