@@ -13,7 +13,6 @@ CREATE TABLE location_information
     date_of_locate          DATE,
 
     CONSTRAINT PK_location_inform_id PRIMARY KEY (location_information_id)
-
 );
 
 
@@ -26,7 +25,6 @@ CREATE TABLE pos_inform
     E_W_Indicator CHAR,
 
     CONSTRAINT PK_pos_inform_pos_inform_id PRIMARY KEY (pos_inform_id)
-
 );
 
 CREATE TABLE RMC
@@ -37,7 +35,6 @@ CREATE TABLE RMC
     status                  CHAR,
     speed_over_ground       FLOAT,
     course_over_ground      FLOAT,
-    date_f                  DATE,
     magnetic_variation      CHAR,
 
     CONSTRAINT PK_RMC_RMC_id PRIMARY KEY (RMC_id),
