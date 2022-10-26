@@ -37,11 +37,12 @@ public class DBConector {
             while (getFormatsFromBuffer(br, standarts)) {
                 System.out.println("=====( " + i++ + " )=======");//TODO удалить
 
-
                 int idOfLocationInformation = sendLocationInformToBd(standarts);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
                 sendGSVToBD(standarts, idOfLocationInformation, idOfGSA);
                 int pos_inform_id = sendPosInform(standarts);
+                sendRmcToBd(standarts, idOfLocationInformation, pos_inform_id);
+                sendGgaToBd(standarts, idOfLocationInformation, pos_inform_id);
 
 
                 System.out.println(pos_inform_id);//TODO удалить
@@ -53,47 +54,86 @@ public class DBConector {
         }
     }
 
+    private void sendGgaToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
+        if (standarts.gga == null ) return;
+        /* language=SQL */
+        String sql = "INSERT INTO GGA (location_information_id, pos_inform_id, position_fix_indicator," +
+                " satellites_used, HDOР,  MSL_altitude, units1, geoid_separation1, units2, age_of_diff_corr, diff_ref_station_id)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, idOfLocationInformation, Types.INTEGER);
+        ps.setObject(2, pos_inform_id, Types.INTEGER);
+        ps.setObject(3, standarts.gga.getPositionFixIndicator(), Types.INTEGER);
+        ps.setObject(4, standarts.gga.getSatellitesUsed(), Types.INTEGER);
+        ps.setObject(5, standarts.gga.getHDOP(), Types.DOUBLE);
+        ps.setObject(6, standarts.gga.getMSLAltitude(), Types.DOUBLE);
+        ps.setObject(7, standarts.gga.getUnits1(), Types.CHAR);
+        ps.setObject(8, standarts.gga.getGeoidSeparation1(), Types.DOUBLE);
+        ps.setObject(9, standarts.gga.getUnits2(), Types.CHAR);
+        ps.setObject(10,standarts.gga.getDiffrefstationID() , Types.INTEGER);
+        ps.setString(11, standarts.gga.getAgeOfDiffCorr());
+
+        ps.executeUpdate();
+
+    }
+
+    private void sendRmcToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
+        if (standarts.rmc == null ) return;
+
+        String sql = "INSERT INTO RMC (location_information_id, pos_inform_id, status," +
+                " speed_over_ground, course_over_ground,  magnetic_variation) " +
+                "VALUES (?, ?, ?, ?, ?, ?);";
+
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, idOfLocationInformation, Types.INTEGER);
+        ps.setObject(2, pos_inform_id, Types.INTEGER);
+        ps.setObject(3, standarts.rmc.getStatus(), Types.CHAR);
+        ps.setObject(4, standarts.rmc.getSpeedOverGround(), Types.FLOAT);
+        ps.setObject(5, standarts.rmc.getCourseOverGround(), Types.FLOAT);
+        ps.setObject(6, standarts.rmc.getMagneticVariation(), Types.CHAR);
+
+        ps.executeUpdate();
+    }
+
     private int sendPosInform(Standarts standarts) throws Exception {
-        if (standarts.gga == null && standarts.rmc == null)
-            return -1;
+        if (standarts.gga == null || standarts.rmc == null) return -1;
 
         PosInform posInform = new PosInform(standarts.gga, standarts.rmc);
-
 
         String sql = "INSERT INTO pos_inform (latitude, N_S_indicator, longitude, E_W_Indicator) " +
                 "VALUES (?, ?, ?, ?) RETURNING pos_inform_id;";
 
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setObject(1, posInform.getLatitude(), Types.FLOAT);
-        preparedStatement.setObject(2, posInform.getIndicatorNS(), Types.CHAR);
-        preparedStatement.setObject(3, posInform.getLongitude(), Types.FLOAT);
-        preparedStatement.setObject(4, posInform.getIndicatorEW(), Types.CHAR);
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, posInform.getLatitude(), Types.FLOAT);
+        ps.setObject(2, posInform.getIndicatorNS(), Types.CHAR);
+        ps.setObject(3, posInform.getLongitude(), Types.FLOAT);
+        ps.setObject(4, posInform.getIndicatorEW(), Types.CHAR);
 
-         ResultSet result = preparedStatement.executeQuery();
+         ResultSet result = ps.executeQuery();
         result.next();
         return result.getInt(1);
     }
 
-    private void sendGSVToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA)
-            throws Exception {
+    private void sendGSVToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA) throws Exception {
         if (standarts.gsv.size() == 0) return;
         if (idOfGSA == -1) throw new Exception("отстутствует внешний ключ idOfGSA");
         /* language=SQL */
         String sql = "INSERT INTO gsv (location_information_id, GSA_id, satellite_id, elevation, azimuth, snr_c_no) " +
                 "VALUES (?, ?, ?, ?, ?, ?);";
-        PreparedStatement preparedStatement;
+        PreparedStatement ps;
 
         for (GSV gsvInf : standarts.gsv) {
-            preparedStatement = connection.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
 
-            preparedStatement.setObject(1, idOfLocationInformation, java.sql.Types.INTEGER);
-            preparedStatement.setObject(2, idOfGSA, java.sql.Types.INTEGER);
-            preparedStatement.setObject(3, gsvInf.getSatelliteID(), java.sql.Types.INTEGER);
-            preparedStatement.setObject(4, gsvInf.getElevation(), java.sql.Types.INTEGER);
-            preparedStatement.setObject(5, gsvInf.getAzimuth(), java.sql.Types.INTEGER);
-            preparedStatement.setObject(6, gsvInf.getSNR_C_No(), java.sql.Types.INTEGER);
+            ps.setObject(1, idOfLocationInformation, java.sql.Types.INTEGER);
+            ps.setObject(2, idOfGSA, java.sql.Types.INTEGER);
+            ps.setObject(3, gsvInf.getSatelliteID(), java.sql.Types.INTEGER);
+            ps.setObject(4, gsvInf.getElevation(), java.sql.Types.INTEGER);
+            ps.setObject(5, gsvInf.getAzimuth(), java.sql.Types.INTEGER);
+            ps.setObject(6, gsvInf.getSNR_C_No(), java.sql.Types.INTEGER);
 
-            preparedStatement.executeUpdate();
+            ps.executeUpdate();
         }
     }
 
@@ -106,17 +146,17 @@ public class DBConector {
         String sql = "INSERT INTO gsa (location_information_id, mode1, mode2, PDOP, HDOP, VDOP) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING GSA_id;";
 
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        if (idOfLocationInformation != -1) preparedStatement.setInt(1, idOfLocationInformation);
-        preparedStatement.setString(2, String.valueOf(standarts.gsa.getMode1()));
-        preparedStatement.setInt(3, standarts.gsa.getMode2());
-        preparedStatement.setDouble(4, standarts.gsa.getPDOP());
-        preparedStatement.setDouble(5, standarts.gsa.getHDOP());
-        preparedStatement.setDouble(6, standarts.gsa.getVDOP());
+        PreparedStatement ps = connection.prepareStatement(sql);
+        if (idOfLocationInformation != -1) ps.setInt(1, idOfLocationInformation);
+        ps.setString(2, String.valueOf(standarts.gsa.getMode1()));
+        ps.setInt(3, standarts.gsa.getMode2());
+        ps.setDouble(4, standarts.gsa.getPDOP());
+        ps.setDouble(5, standarts.gsa.getHDOP());
+        ps.setDouble(6, standarts.gsa.getVDOP());
 
-        ResultSet result = preparedStatement.executeQuery();
-
+        ResultSet result = ps.executeQuery();
         result.next();
+
         return result.getInt(1);
     }
 
@@ -129,14 +169,14 @@ public class DBConector {
         /* language=SQL */
         String sql = "INSERT INTO location_information (device_id, UTC_date, date_of_locate) " +
                 "VALUES (?, ?, ?) RETURNING location_information_id;";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        PreparedStatement ps = connection.prepareStatement(sql);
 
-        preparedStatement.setInt(1, 1);
-        preparedStatement.setFloat(2, time);
-        preparedStatement.setDate(3, standarts.rmc.getDate());
-        ResultSet result = preparedStatement.executeQuery();
-
+        ps.setInt(1, 1);
+        ps.setFloat(2, time);
+        ps.setDate(3, standarts.rmc.getDate());
+        ResultSet result = ps.executeQuery();
         result.next();
+
         return result.getInt(1);
     }
 
@@ -148,12 +188,10 @@ public class DBConector {
             while (f && (bufString = br.readLine()) != null) {
                 //logger.info(bufString);
                 f = getStrWithFormat(standarts, bufString, f);
-
             }
         } catch (Exception ex) {
             throw ex;
         }
-
         return bufString != null;
     }
 
@@ -165,23 +203,13 @@ public class DBConector {
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
                 case "$GPGGA":
-                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
-                    //logger.info("========$GPGGA распарсен========");
-                    break;
+                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
                 case "$GPGSV":
-                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
-                    //logger.info("========$GPGSV распарсен========");
-
-                    break;
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
                 case "$GPGSA":
-                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
-                    //logger.info("========$GPGSA распарсен========");
-                    break;
+                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
                 case "$GPRMC":
                     standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
-                    //logger.info("========$GPRMC распарсен========");
-                    //System.out.println(standarts.rmc.getDate()
-                    // + " " + standarts.rmc.getTimeUTC());
                     f = false;
                     break;
                 default:
