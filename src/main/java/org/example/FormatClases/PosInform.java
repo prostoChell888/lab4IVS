@@ -7,6 +7,12 @@ public class PosInform {
     Double longitude;
     Character indicatorEW;
 
+    public PosInform(GGA gga, RMC rmc) {
+        latitude = (gga.getLatitude() != null)? gga.getLatitude():rmc.getLatitude();
+        indicatorNS = (gga.getIndicatorNS() != null)? gga.getIndicatorNS():rmc.getIndicatorNS();
+        longitude = (gga.getLongitude() != null)? gga.getLongitude():rmc.getLongitude();
+        indicatorNS = (gga.getIndicatorEW() != null)? gga.getIndicatorEW():rmc.getIndicatorEW();
+    }
 
 
     public Double getLatitude() {

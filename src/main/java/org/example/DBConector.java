@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.FormatClases.GSV;
+import org.example.FormatClases.PosInform;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +12,7 @@ public class DBConector {
     Logger logger;
 
     {
-        logger =Logger.getLogger(DBConector.class.getName());
+        logger = Logger.getLogger(DBConector.class.getName());
         Handler h = new ConsoleHandler();
         h.setFormatter(new MyFormater());
 
@@ -23,12 +24,10 @@ public class DBConector {
 
     public DBConector(String DB_URL, String DB_USERNAME, String DB_PASSWORD) throws SQLException {
         connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-
     }
 
 
     public void addInfoFromRafFile(File file) throws Exception {
-
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
@@ -36,13 +35,16 @@ public class DBConector {
             var standarts = new Standarts();
             int i = 0;
             while (getFormatsFromBuffer(br, standarts)) {
-                System.out.println("=====( " + i++ + " )=======");
-                standarts.gsv.forEach(System.out::println);
+                System.out.println("=====( " + i++ + " )=======");//TODO удалить
+
 
                 int idOfLocationInformation = sendLocationInformToBd(standarts);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
-                putInformationToBD(standarts, idOfLocationInformation, idOfGSA);
-                System.out.println(idOfGSA);
+                sendGSVToBD(standarts, idOfLocationInformation, idOfGSA);
+                int pos_inform_id = sendPosInform(standarts);
+
+
+                System.out.println(pos_inform_id);//TODO удалить
 
                 standarts = new Standarts();
             }
@@ -51,17 +53,37 @@ public class DBConector {
         }
     }
 
-    private void putInformationToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA)
+    private int sendPosInform(Standarts standarts) throws Exception {
+        if (standarts.gga == null && standarts.rmc == null)
+            return -1;
+
+        PosInform posInform = new PosInform(standarts.gga, standarts.rmc);
+
+
+        String sql = "INSERT INTO pos_inform (latitude, N_S_indicator, longitude, E_W_Indicator) " +
+                "VALUES (?, ?, ?, ?) RETURNING pos_inform_id;";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setObject(1, posInform.getLatitude(), Types.FLOAT);
+        preparedStatement.setObject(2, posInform.getIndicatorNS(), Types.CHAR);
+        preparedStatement.setObject(3, posInform.getLongitude(), Types.FLOAT);
+        preparedStatement.setObject(4, posInform.getIndicatorEW(), Types.CHAR);
+
+         ResultSet result = preparedStatement.executeQuery();
+        result.next();
+        return result.getInt(1);
+    }
+
+    private void sendGSVToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA)
             throws Exception {
         if (standarts.gsv.size() == 0) return;
-        if (idOfGSA == -1)throw new Exception("отстутствует внешний ключ idOfGSA");
+        if (idOfGSA == -1) throw new Exception("отстутствует внешний ключ idOfGSA");
         /* language=SQL */
         String sql = "INSERT INTO gsv (location_information_id, GSA_id, satellite_id, elevation, azimuth, snr_c_no) " +
                 "VALUES (?, ?, ?, ?, ?, ?);";
-
         PreparedStatement preparedStatement;
 
-        for (GSV gsvInf:standarts.gsv) {
+        for (GSV gsvInf : standarts.gsv) {
             preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setObject(1, idOfLocationInformation, java.sql.Types.INTEGER);
@@ -71,13 +93,13 @@ public class DBConector {
             preparedStatement.setObject(5, gsvInf.getAzimuth(), java.sql.Types.INTEGER);
             preparedStatement.setObject(6, gsvInf.getSNR_C_No(), java.sql.Types.INTEGER);
 
-             preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
         }
     }
 
     private Integer sendGSAToBd(Standarts standarts, int idOfLocationInformation) throws Exception {
         if (standarts.gsa == null) return -1;
-        if (idOfLocationInformation == -1){
+        if (idOfLocationInformation == -1) {
             throw new Exception("отсутствует внешний ключ idOfLocationInformation\n");
         }
         /* language=SQL */
