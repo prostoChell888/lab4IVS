@@ -1,35 +1,35 @@
 package org.example.FormatClases;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 //идет вторым по счету
 public class RMC {
 
 
-    Double timeUTC;//привести к нужному формату(возможно к дабл)
+    Float timeUTC;
     Character status;
-    Double latitude; //распрсить
+    Double latitude;
     Character indicatorNS;
     Double longitude;
     Character indicatorEW;
     Double speedOverGround;
     Double courseOverGround;
-    String date; //распарсить и привести к нужному значению
+    java.sql.Date date; //распарсить и привести к нужному значению
     Character magneticVariation;
     Integer checksum;
 
-    public Double getTimeUTC() {
+    public Float getTimeUTC() {
         return timeUTC;
     }
 
     public void setTimeUTC(String timeUTC) {
         if (timeUTC.equals("")) return;
 
-
-        double timeInHours = Double.parseDouble(timeUTC.substring(0, 2)) + 3;
-        timeInHours += Double.parseDouble(timeUTC.substring(2, 4)) / 60;
-        timeInHours += Double.parseDouble(timeUTC.substring(4, 6)) / 360;
-
+        Float timeInHours = Float.parseFloat(timeUTC.substring(0, 2)) + 3;
+        timeInHours += Float.parseFloat(timeUTC.substring(2, 4)) / 60;
+        timeInHours += Float.parseFloat(timeUTC.substring(4, 6)) / 360;
 
         this.timeUTC = timeInHours;
     }
@@ -96,20 +96,19 @@ public class RMC {
         this.courseOverGround = Double.parseDouble(courseOverGround);
     }
 
-    public String getDate() {
+    public java.sql.Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(String date)  {
         if (date.equals("")) return;
 
         String day = date.substring(0, 2);
         String moth = date.substring(2, 4);
         String year = date.substring(4, 6);
 
-        String stringBuilder = "20" + year + "-" + moth + "-" + day;
+        this.date =  java.sql.Date.valueOf("20" + year + "-" + moth + "-" + day);
 
-        this.date = stringBuilder;
     }
 
     public Character getMagneticVariation() {

@@ -33,7 +33,7 @@ public class GGA {
     public void setTimeUTC(String timeUTC) {
         if (timeUTC.equals("")) return;
 
-        Float timeInHours = Float.parseFloat(timeUTC.substring(0, 2)) + 3;
+        float timeInHours = Float.parseFloat(timeUTC.substring(0, 2)) + 3;
         timeInHours += Float.parseFloat(timeUTC.substring(2, 4)) / 60;
         timeInHours += Float.parseFloat(timeUTC.substring(4, 6)) / 360;
 

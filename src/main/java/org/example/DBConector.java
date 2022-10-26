@@ -1,8 +1,10 @@
 package org.example;
+
+import org.example.FormatClases.GSV;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.Date;
 import java.util.logging.*;
 
 public class DBConector {
@@ -15,9 +17,11 @@ public class DBConector {
         logger.setUseParentHandlers(false);
         logger.addHandler(h);
     }
+
     private final Connection connection;
+
     public DBConector(String DB_URL, String DB_USERNAME, String DB_PASSWORD) throws SQLException {
-         connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+        connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
 
     }
 
@@ -30,7 +34,12 @@ public class DBConector {
 
             var standarts = new Standarts();
             while (getFormatsFromBuffer(br, standarts)) {
-               putInformationToBD(standarts);
+
+                int idOfLocationInformation = sendLocationInformToBd(standarts);
+                int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
+                //putInformationToBD(standarts, idOfLocationInformation, idOfGSA);
+                System.out.println(idOfGSA);
+
                 standarts = new Standarts();
             }
         } catch (Exception ex) {
@@ -38,23 +47,60 @@ public class DBConector {
         }
     }
 
-    private void putInformationToBD(Standarts standarts) throws SQLException {
-        int idOfLocationInformation = sendLocationInformToBd(standarts);
-        /* language=SQL */
-        //String sql = "insert intogsa  (device_id, UTC_date, date_of_locate) " +
-                //"values (?, ?, ?) Returning *;";
+    private void putInformationToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA)
+            throws Exception {
+        if (standarts.gsv == null) return;
+        if (idOfGSA == -1)throw new Exception("отстутствует внешний ключ idOfGSA");
 
+        /* language=SQL */
+        String sql = "INSERT INTO gsa (location_information_id, GSA_id, satellite_id, elevation, azimuth, snr_c_no) " +
+                "VALUES (?, ?, ?, ?, ?, ?);";
+
+        PreparedStatement preparedStatement;
+
+        for (GSV gsvInf:standarts.gsv.getGsVinfList()) {
+            preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setInt(1, idOfGSA);
+            preparedStatement.setInt(2, idOfLocationInformation);
+            preparedStatement.setInt(3, gsvInf.getSatelliteID());
+
+             preparedStatement.executeQuery();
+        }
+    }
+
+    private Integer sendGSAToBd(Standarts standarts, int idOfLocationInformation) throws Exception {
+        if (standarts.gsa == null) return -1;
+        if (idOfLocationInformation == -1){
+            throw new Exception("отсутствует внешний ключ idOfLocationInformation\n");
+        }
+        /* language=SQL */
+        String sql = "INSERT INTO gsa (location_information_id, mode1, mode2, PDOP, HDOP, VDOP) " +
+                "VALUES (?, ?, ?, ?, ?, ?) RETURNING GSA_id;";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        if (idOfLocationInformation != -1) preparedStatement.setInt(1, idOfLocationInformation);
+        preparedStatement.setString(2, String.valueOf(standarts.gsa.getMode1()));
+        preparedStatement.setInt(3, standarts.gsa.getMode2());
+        preparedStatement.setDouble(4, standarts.gsa.getPDOP());
+        preparedStatement.setDouble(5, standarts.gsa.getHDOP());
+        preparedStatement.setDouble(6, standarts.gsa.getVDOP());
+
+        ResultSet result = preparedStatement.executeQuery();
+
+        result.next();
+        return result.getInt(1);
     }
 
     private int sendLocationInformToBd(Standarts standarts) throws SQLException {
         Float time;
         if (standarts.rmc != null) time = standarts.rmc.getTimeUTC();
-        else if(standarts.gga != null) time = standarts.gga.getTimeUTC();
-        else return - 1;
+        else if (standarts.gga != null) time = standarts.gga.getTimeUTC();
+        else return -1;
 
         /* language=SQL */
-        String sql = "insert into location_information (device_id, UTC_date, date_of_locate) " +
-                "values (?, ?, ?) Returning location_information_id;";
+        String sql = "INSERT INTO location_information (device_id, UTC_date, date_of_locate) " +
+                "VALUES (?, ?, ?) RETURNING location_information_id;";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
         preparedStatement.setInt(1, 1);
@@ -104,14 +150,16 @@ public class DBConector {
                 case "$GPRMC":
                     standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     //logger.info("========$GPRMC распарсен========");
-                    System.out.println(standarts.rmc.getDate()
-                            + " " + standarts.rmc.getTimeUTC());
+                    //System.out.println(standarts.rmc.getDate()
+                    // + " " + standarts.rmc.getTimeUTC());
                     f = false;
                     break;
                 default:
                     throw new Exception("Ошибка считывания файла");
             }
-        } catch (Exception ex) {throw ex;}
+        } catch (Exception ex) {
+            throw ex;
+        }
         return f;
     }
 }

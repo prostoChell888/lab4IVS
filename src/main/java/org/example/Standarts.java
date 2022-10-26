@@ -9,15 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Standarts {
-    public GGA gga;
-    public GSA gsa;
+    public GGA gga = null;
+    public GSA gsa = null;
     public List<GSV> gsv;
-    public RMC rmc;
+    public RMC rmc = null;
 
     public Standarts() {
-        this.gga = new GGA();
-        this.gsa = new GSA();
+
         gsv = new ArrayList<>();
-        this.rmc = new RMC();
+
     }
 }

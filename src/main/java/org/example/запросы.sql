@@ -1,20 +1,18 @@
-DROP TABLE IF EXISTS location_information;
-DROP TABLE IF EXISTS pos_inform;
-DROP TABLE IF EXISTS RMC;
 DROP TABLE IF EXISTS GGA;
-DROP TABLE IF EXISTS GSA;
 DROP TABLE IF EXISTS GSV;
-
-
+DROP TABLE IF EXISTS RMC;
+DROP TABLE IF EXISTS GSA;
+DROP TABLE IF EXISTS pos_inform;
+DROP TABLE IF EXISTS location_information;
 
 CREATE TABLE location_information
 (
     location_information_id INT GENERATED ALWAYS AS IDENTITY NOT NULL,
     device_id               INT,
-    UTC_date                date,
+    UTC_date                FLOAT,
+    date_of_locate          DATE,
 
     CONSTRAINT PK_location_inform_id PRIMARY KEY (location_information_id)
-
 
 );
 
