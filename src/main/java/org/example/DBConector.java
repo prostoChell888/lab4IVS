@@ -8,9 +8,10 @@ import java.sql.*;
 import java.util.logging.*;
 
 public class DBConector {
+    Logger logger;
 
     {
-        Logger logger = Logger.getLogger(DBConector.class.getName());
+        logger =Logger.getLogger(DBConector.class.getName());
         Handler h = new ConsoleHandler();
         h.setFormatter(new MyFormater());
 
@@ -33,11 +34,14 @@ public class DBConector {
              BufferedReader br = new BufferedReader(isr)) {
 
             var standarts = new Standarts();
+            int i = 0;
             while (getFormatsFromBuffer(br, standarts)) {
+                System.out.println("=====( " + i++ + " )=======");
+                standarts.gsv.forEach(System.out::println);
 
                 int idOfLocationInformation = sendLocationInformToBd(standarts);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
-                //putInformationToBD(standarts, idOfLocationInformation, idOfGSA);
+                putInformationToBD(standarts, idOfLocationInformation, idOfGSA);
                 System.out.println(idOfGSA);
 
                 standarts = new Standarts();
@@ -49,23 +53,25 @@ public class DBConector {
 
     private void putInformationToBD(Standarts standarts, int idOfLocationInformation, int idOfGSA)
             throws Exception {
-        if (standarts.gsv == null) return;
+        if (standarts.gsv.size() == 0) return;
         if (idOfGSA == -1)throw new Exception("отстутствует внешний ключ idOfGSA");
-
         /* language=SQL */
-        String sql = "INSERT INTO gsa (location_information_id, GSA_id, satellite_id, elevation, azimuth, snr_c_no) " +
+        String sql = "INSERT INTO gsv (location_information_id, GSA_id, satellite_id, elevation, azimuth, snr_c_no) " +
                 "VALUES (?, ?, ?, ?, ?, ?);";
 
         PreparedStatement preparedStatement;
 
-        for (GSV gsvInf:standarts.gsv.getGsVinfList()) {
+        for (GSV gsvInf:standarts.gsv) {
             preparedStatement = connection.prepareStatement(sql);
 
-            preparedStatement.setInt(1, idOfGSA);
-            preparedStatement.setInt(2, idOfLocationInformation);
-            preparedStatement.setInt(3, gsvInf.getSatelliteID());
+            preparedStatement.setObject(1, idOfLocationInformation, java.sql.Types.INTEGER);
+            preparedStatement.setObject(2, idOfGSA, java.sql.Types.INTEGER);
+            preparedStatement.setObject(3, gsvInf.getSatelliteID(), java.sql.Types.INTEGER);
+            preparedStatement.setObject(4, gsvInf.getElevation(), java.sql.Types.INTEGER);
+            preparedStatement.setObject(5, gsvInf.getAzimuth(), java.sql.Types.INTEGER);
+            preparedStatement.setObject(6, gsvInf.getSNR_C_No(), java.sql.Types.INTEGER);
 
-             preparedStatement.executeQuery();
+             preparedStatement.executeUpdate();
         }
     }
 
@@ -120,6 +126,7 @@ public class DBConector {
             while (f && (bufString = br.readLine()) != null) {
                 //logger.info(bufString);
                 f = getStrWithFormat(standarts, bufString, f);
+
             }
         } catch (Exception ex) {
             throw ex;
@@ -140,8 +147,9 @@ public class DBConector {
                     //logger.info("========$GPGGA распарсен========");
                     break;
                 case "$GPGSV":
-                    standarts.gsv.add(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
                     //logger.info("========$GPGSV распарсен========");
+
                     break;
                 case "$GPGSA":
                     standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);

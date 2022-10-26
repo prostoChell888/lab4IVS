@@ -15,8 +15,6 @@ public class Standarts {
     public RMC rmc = null;
 
     public Standarts() {
-
         gsv = new ArrayList<>();
-
     }
 }

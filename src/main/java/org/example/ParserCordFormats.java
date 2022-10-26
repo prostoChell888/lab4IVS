@@ -5,6 +5,8 @@ import org.example.FormatClases.GSA;
 import org.example.FormatClases.GSV;
 import org.example.FormatClases.RMC;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class ParserCordFormats {
@@ -52,23 +54,21 @@ public class ParserCordFormats {
         return gsa;
     }
 
-    static public GSV GSV_Parser(String[] data) {
-        var gsv = new GSV();
-        gsv.setNumberOfMessages(data[1]);
-        gsv.setMessageNumber(data[2]);
-        gsv.setSatellitesInView(data[3]);
+    static public List<GSV> GSV_Parser(String[] data) {
+        List<GSV> gsvList = new ArrayList<>();
+
         for (int i = 4; (data.length - i) > 4; i += 4) {
-            GSV.GSVinf gsVinf = new GSV.GSVinf();
+            GSV gsv = new GSV();
 
-            gsVinf.setSatelliteID(data[i]);
-            gsVinf.setElevation(data[i + 1]);
-            gsVinf.setAzimuth(data[i + 2]);
-            gsVinf.setSNR_C_No(data[i + 3]);
+            gsv.setSatelliteID(data[i]);
+            gsv.setElevation(data[i + 1]);
+            gsv.setAzimuth(data[i + 2]);
+            gsv.setSNR_C_No(data[i + 3]);
 
-            gsv.addGsVinf(gsVinf);
+            gsvList.add(gsv);
         }
 
-        return gsv;
+        return gsvList;
     }
 
     static public RMC RMC_Parser(String[] data) {

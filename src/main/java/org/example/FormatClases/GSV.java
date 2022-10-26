@@ -8,7 +8,6 @@ import java.util.List;
 //для этого создастся отдельный объект для добавление на сервер
 
 public class GSV {
-    public static class GSVinf {
         Integer satelliteID;
         Integer elevation;
         Integer azimuth;
@@ -49,47 +48,15 @@ public class GSV {
             if (SNR_C_No.equals("")) return;
             this.SNR_C_No = Integer.parseInt(SNR_C_No);
         }
-    }
 
-    Integer numberOfMessages;
-    Integer messageNumber;
-    Integer satellitesInView;
-    List<GSVinf> gsVinfList = new ArrayList<>();
-
-    public Integer getNumberOfMessages() {
-        return numberOfMessages;
-    }
-
-    public void setNumberOfMessages(String numberOfMessages) {
-        if (numberOfMessages.equals("")) return;
-        this.numberOfMessages = Integer.parseInt(numberOfMessages);
-
-    }
-
-    public Integer getMessageNumber() {
-        return messageNumber;
-    }
-
-    public void setMessageNumber(String messageNumber) {
-        if (messageNumber.equals("")) return;
-        this.messageNumber = Integer.parseInt(messageNumber);
-    }
-
-    public Integer getSatellitesInView() {
-        return satellitesInView;
-    }
-
-    public void setSatellitesInView(String satellitesInView) {
-        if (satellitesInView.equals("")) return;
-        this.satellitesInView = Integer.parseInt(satellitesInView);
-    }
-
-    public List<GSVinf> getGsVinfList() {
-        return gsVinfList;
-    }
-
-    public void addGsVinf(GSVinf gsVinfList) {
-        this.gsVinfList.add(gsVinfList);
+    @Override
+    public String toString() {
+        return "GSV{" +
+                "satelliteID=" + satelliteID +
+                ", elevation=" + elevation +
+                ", azimuth=" + azimuth +
+                ", SNR_C_No=" + SNR_C_No +
+                '}';
     }
 }
 
