@@ -6,7 +6,7 @@ import java.util.Date;
 public class RMC {
 
 
-    String timeUTC;//привести к нужному формату(возможно к дабл)
+    Double timeUTC;//привести к нужному формату(возможно к дабл)
     Character status;
     Double latitude; //распрсить
     Character indicatorNS;
@@ -18,17 +18,20 @@ public class RMC {
     Character magneticVariation;
     Integer checksum;
 
-    public String getTimeUTC() {
+    public Double getTimeUTC() {
         return timeUTC;
     }
 
     public void setTimeUTC(String timeUTC) {
         if (timeUTC.equals("")) return;
 
-        var sb = new StringBuilder(timeUTC);
-        sb.insert(2, ':');
-        sb.insert(5, ':');
-        this.timeUTC = sb.toString();
+
+        double timeInHours = Double.parseDouble(timeUTC.substring(0, 2)) + 3;
+        timeInHours += Double.parseDouble(timeUTC.substring(2, 4)) / 60;
+        timeInHours += Double.parseDouble(timeUTC.substring(4, 6)) / 360;
+
+
+        this.timeUTC = timeInHours;
     }
     public Character getStatus() {
         return status;
