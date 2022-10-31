@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.newClasses.FilesHolder;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -25,24 +27,21 @@ public class ButtomFactory {
     }
 
 
-    public static JButton createButtonOpen(JFrame frame) {
-        JButton jButton = new JButton("Открыть");
+    public static JButton createButtonOpen(JLabel jl, FilesHolder files) {
+        JButton jButton = new JButton("Выбрать");
 
         jButton.addActionListener(x -> {
             String flag = x.getActionCommand();
-            if (flag.equals("Открыть")) {
+            if (flag.equals("Выбрать")) {
                 JFileChooser jC = new JFileChooser();
                 int dialoVal = jC.showOpenDialog(null);
                 //если выбор был сделан
                 if (dialoVal == JFileChooser.APPROVE_OPTION) {
                     try {
-                        File chosenFile = jC.getSelectedFile();
-                        List<Location> listWithCoordinates =
-                                CordParser.parseTxtFile(chosenFile);
-                        FramePrinter.printTableWindow(frame, listWithCoordinates);
-
+                        files.file1 = jC.getSelectedFile();
+                        jl.setText(files.file1.getName());
                     } catch (Exception e) {
-                        FramePrinter.printDownloudWindow(frame, e.getMessage());
+                        jl.setText(e.getMessage());
                     }
                 }
             }
