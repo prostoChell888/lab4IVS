@@ -1,4 +1,4 @@
-package org.example;
+package org.example.FormatClases;
 
 import org.example.FormatClases.GGA;
 import org.example.FormatClases.GSA;

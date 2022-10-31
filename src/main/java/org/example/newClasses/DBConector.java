@@ -1,7 +1,9 @@
-package org.example;
+package org.example.newClasses;
 
 import org.example.FormatClases.GSV;
 import org.example.FormatClases.PosInform;
+import org.example.FormatClases.Standarts;
+import org.example.MyFormater;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +46,6 @@ public class DBConector {
                 sendRmcToBd(standarts, idOfLocationInformation, pos_inform_id);
                 sendGgaToBd(standarts, idOfLocationInformation, pos_inform_id);
 
-
                 System.out.println(pos_inform_id);//TODO удалить
 
                 standarts = new Standarts();
@@ -58,7 +59,7 @@ public class DBConector {
         if (standarts.gga == null ) return;
         /* language=SQL */
         String sql = "INSERT INTO GGA (location_information_id, pos_inform_id, position_fix_indicator," +
-                " satellites_used, HDOР,  MSL_altitude, units1, geoid_separation1, units2, age_of_diff_corr, diff_ref_station_id)" +
+                " satellites_used, HDOP,  MSL_altitude, units1, geoid_separation1, units2, age_of_diff_corr, diff_ref_station_id)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         PreparedStatement ps = connection.prepareStatement(sql);

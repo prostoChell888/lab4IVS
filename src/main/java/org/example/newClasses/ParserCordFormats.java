@@ -1,4 +1,4 @@
-package org.example;
+package org.example.newClasses;
 
 import org.example.FormatClases.GGA;
 import org.example.FormatClases.GSA;
@@ -77,9 +77,9 @@ public class ParserCordFormats {
         rmc.setTimeUTC(data[1]);
         rmc.setStatus(data[2]);
         rmc.setLatitude(data[3]);
-        rmc.setIndicatorNS(data[4]);
+        rmc.setIndicatorNS(data[4]);//
         rmc.setLongitude(data[5]);
-        rmc.setIndicatorEW(data[6]);
+        rmc.setIndicatorEW(data[6]);//
         rmc.setSpeedOverGround(data[7]);
         rmc.setCourseOverGround(data[8]);
         rmc.setDate(data[9]);

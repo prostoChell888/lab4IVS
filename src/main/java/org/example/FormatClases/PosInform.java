@@ -11,7 +11,7 @@ public class PosInform {
         latitude = (gga.getLatitude() != null)? gga.getLatitude():rmc.getLatitude();
         indicatorNS = (gga.getIndicatorNS() != null)? gga.getIndicatorNS():rmc.getIndicatorNS();
         longitude = (gga.getLongitude() != null)? gga.getLongitude():rmc.getLongitude();
-        indicatorNS = (gga.getIndicatorEW() != null)? gga.getIndicatorEW():rmc.getIndicatorEW();
+        indicatorEW = (gga.getIndicatorEW() != null)? gga.getIndicatorEW():rmc.getIndicatorEW();
     }
 
 
