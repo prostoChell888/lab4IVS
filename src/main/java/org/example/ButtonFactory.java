@@ -6,7 +6,6 @@ import org.example.newClasses.FilesHolder;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.List;
 
 import static java.awt.Component.LEFT_ALIGNMENT;
@@ -39,15 +38,14 @@ public class ButtonFactory {
             try {
                 DBCConnector dbConector = new DBCConnector(DB_URL, DB_USERNAME, DB_PASSWORD);
                 dbConector.addInfoFromRafFile(holderFirstFile.file);
-                System.out.println("спарсил");
+                System.out.println("все ок");
                 FramePrinter.printGeneralWindow(frame, dbConector);
             } catch (Exception e) {
                 try {
-                if (holderFirstFile.file == null) {
+                    if (holderFirstFile.file == null) {
                         FramePrinter.printDownloudWindow(frame, "выбереите файл");
-                }
-                else
-                    FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация");
+                    } else
+                        FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация");
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

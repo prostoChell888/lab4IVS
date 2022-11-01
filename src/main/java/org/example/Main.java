@@ -20,12 +20,8 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) throws Exception {
         //createBD();
-
-
         //testBD();
-
 //todo здесь раздереление
-
         App fileSelectExample = new App();fileSelectExample.setVisible(true);
 
     }

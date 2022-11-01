@@ -53,7 +53,7 @@ CREATE TABLE GGA
     pos_inform_id           INT,
     position_fix_indicator  INT,
     satellites_used         INT,
-    HDOР                    FLOAT,
+    HDOP                    FLOAT,
     MSL_altitude            FLOAT,
     units1                  CHAR,
     geoid_separation1       FLOAT,

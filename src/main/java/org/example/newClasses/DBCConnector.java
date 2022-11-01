@@ -49,9 +49,12 @@ public class DBCConnector {
                 standarts = new Standarts();
             }
             if (isEmpty) throw new IOException("Файл не содержит нужной информации");
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
-        }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
+    }
     }
 
     private boolean checkAvailabilityOfinfo(Standarts standarts) {
@@ -208,15 +211,9 @@ public class DBCConnector {
 
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
-                case "$GPGGA":
-                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
-                    break;
-                case "$GPGSV":
-                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
-                    break;
-                case "$GPGSA":
-                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
-                    break;
+                case "$GPGGA": standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
+                case "$GPGSV": standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
+                case "$GPGSA": standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
                 case "$GPRMC":
                     standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
