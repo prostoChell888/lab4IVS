@@ -46,7 +46,11 @@
         <!-- https://mvnrepository.com/artifact/jdbc.postgresql/postgresql -->
 
 
-
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.0</version>
+        </dependency>
 
     </dependencies>
 

@@ -3,5 +3,5 @@ package org.example.newClasses;
 import java.io.File;
 
 public class FilesHolder {
-    public File file1;
+    public File file;
 }

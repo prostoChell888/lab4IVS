@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.newClasses.DBCConnector;
+import org.example.newClasses.FilesHolder;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -10,12 +12,17 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FramePrinter {
 
-    public static void printDownloudWindow(JFrame frame, String fileStatus) {
+    public static void printMainWindow(JFrame frame, String fileStatus) {
+
+    }
+
+    public static void printDownloudWindow(JFrame frame, String fileStatus) throws Exception {
         frame.setSize(300, 200);
         frame.setResizable(false);
         frame.getRootPane().setBorder
@@ -30,15 +37,47 @@ public class FramePrinter {
                 (2, 0, 10, 50));
 
         JLabel jl = new JLabel("Выбирите файл");
-        JButton buttonOpen = ButtomFactory.createButtonOpen(frame);
+        var holderFirstFile = new FilesHolder();
         JLabel status = new JLabel(fileStatus);
+        JButton buttonChooseFile = ButtonFactory.createButtonChooseFile(status, holderFirstFile);
+
+        JButton buttonOpen = ButtonFactory.createOpenButton(frame, holderFirstFile);
 
         container.add(jl);
-        container.add(buttonOpen);
+        container.add(buttonChooseFile);
         container.add(status);
+        container.add(buttonOpen);
 
         frame.revalidate();
         frame.repaint();
+    }
+
+    public static void printGeneralWindow(JFrame frame, DBCConnector connector) throws Exception {
+
+        Container container = frame.getContentPane();
+        container.removeAll();
+        container.setLayout(new BorderLayout());
+
+        JPanel jPanel = new JPanel();
+        container.add(jPanel, BorderLayout.NORTH);
+
+        JToolBar jToolBar = new JToolBar("Запросы");
+        jPanel.add(jToolBar);
+
+        jToolBar.add(new Button("1111"));
+        jToolBar.add(new Button("1111"));
+        jToolBar.add(new Button("1111"));
+        jToolBar.add(new Button("1111"));
+
+        JTable table = new JTable();
+        JScrollPane scrollPane = new JScrollPane(table);
+        container.add(scrollPane, BorderLayout.CENTER);
+
+
+
+        frame.revalidate();
+        frame.repaint();
+
     }
 
 
@@ -64,12 +103,12 @@ public class FramePrinter {
 
         StringBuilder nameOfXAxis = new StringBuilder();
         StringBuilder nameOfYAxis = new StringBuilder();
-        JComboBox boxAxisX = ButtomFactory.createComboBoxChooseAxis(listXAxis, listWithCoordinates, nameOfXAxis);
-        JComboBox boxAxisY = ButtomFactory.createComboBoxChooseAxis(listYAxis, listWithCoordinates, nameOfYAxis);
+        JComboBox boxAxisX = ButtonFactory.createComboBoxChooseAxis(listXAxis, listWithCoordinates, nameOfXAxis);
+        JComboBox boxAxisY = ButtonFactory.createComboBoxChooseAxis(listYAxis, listWithCoordinates, nameOfYAxis);
 
-        JButton loadFileButton = ButtomFactory.createLoadFileButton(frame);
+        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
 
-        JButton graphButton = ButtomFactory.createGraphButton(frame, listXAxis, listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
+        JButton graphButton = ButtonFactory.createGraphButton(frame, listXAxis, listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
 
 
 
@@ -142,8 +181,8 @@ public class FramePrinter {
 
         JPanel grid = new JPanel(new GridLayout(2, 1, 0, 5));
 
-        JButton loadFileButton = ButtomFactory.createLoadFileButton(frame);
-        JButton tableBitton = ButtomFactory.createTable(frame, listWithCoordinates);
+        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
+        JButton tableBitton = ButtonFactory.createTable(frame, listWithCoordinates);
 
         grid.add(loadFileButton);
         grid.add(tableBitton);

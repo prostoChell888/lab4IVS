@@ -10,11 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.logging.*;
 
-public class DBConector {
+public class DBCConnector {
     Logger logger;
 
     {
-        logger = Logger.getLogger(DBConector.class.getName());
+        logger = Logger.getLogger(DBCConnector.class.getName());
         Handler h = new ConsoleHandler();
         h.setFormatter(new MyFormater());
 
@@ -24,7 +24,7 @@ public class DBConector {
 
     private final Connection connection;
 
-    public DBConector(String DB_URL, String DB_USERNAME, String DB_PASSWORD) throws SQLException {
+    public DBCConnector(String DB_URL, String DB_USERNAME, String DB_PASSWORD) throws SQLException {
         connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
     }
 
@@ -35,10 +35,10 @@ public class DBConector {
              BufferedReader br = new BufferedReader(isr)) {
 
             var standarts = new Standarts();
-            int i = 0;
+            boolean isEmpty = true;
             while (getFormatsFromBuffer(br, standarts)) {
-                System.out.println("=====( " + i++ + " )=======");//TODO удалить
 
+                isEmpty = checkAvailabilityOfinfo(standarts);
                 int idOfLocationInformation = sendLocationInformToBd(standarts);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
                 sendGSVToBD(standarts, idOfLocationInformation, idOfGSA);
@@ -46,17 +46,21 @@ public class DBConector {
                 sendRmcToBd(standarts, idOfLocationInformation, pos_inform_id);
                 sendGgaToBd(standarts, idOfLocationInformation, pos_inform_id);
 
-                System.out.println(pos_inform_id);//TODO удалить
-
                 standarts = new Standarts();
             }
+            if (isEmpty) throw new IOException("Файл не содержит нужной информации");
         } catch (Exception ex) {
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
         }
     }
 
+    private boolean checkAvailabilityOfinfo(Standarts standarts) {
+        return standarts.gga == null && standarts.rmc == null &&
+                standarts.gsa == null &&  standarts.gsv.size() == 0;
+    }
+
     private void sendGgaToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
-        if (standarts.gga == null ) return;
+        if (standarts.gga == null) return;
         /* language=SQL */
         String sql = "INSERT INTO GGA (location_information_id, pos_inform_id, position_fix_indicator," +
                 " satellites_used, HDOP,  MSL_altitude, units1, geoid_separation1, units2, age_of_diff_corr, diff_ref_station_id)" +
@@ -72,7 +76,7 @@ public class DBConector {
         ps.setObject(7, standarts.gga.getUnits1(), Types.CHAR);
         ps.setObject(8, standarts.gga.getGeoidSeparation1(), Types.DOUBLE);
         ps.setObject(9, standarts.gga.getUnits2(), Types.CHAR);
-        ps.setObject(10,standarts.gga.getDiffrefstationID() , Types.INTEGER);
+        ps.setObject(10, standarts.gga.getDiffrefstationID(), Types.INTEGER);
         ps.setString(11, standarts.gga.getAgeOfDiffCorr());
 
         ps.executeUpdate();
@@ -80,7 +84,7 @@ public class DBConector {
     }
 
     private void sendRmcToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
-        if (standarts.rmc == null ) return;
+        if (standarts.rmc == null) return;
 
         String sql = "INSERT INTO RMC (location_information_id, pos_inform_id, status," +
                 " speed_over_ground, course_over_ground,  magnetic_variation) " +
@@ -111,7 +115,7 @@ public class DBConector {
         ps.setObject(3, posInform.getLongitude(), Types.FLOAT);
         ps.setObject(4, posInform.getIndicatorEW(), Types.CHAR);
 
-         ResultSet result = ps.executeQuery();
+        ResultSet result = ps.executeQuery();
         result.next();
         return result.getInt(1);
     }
@@ -185,9 +189,10 @@ public class DBConector {
 
         String bufString = null;
         boolean f = true;
+
         try {
             while (f && (bufString = br.readLine()) != null) {
-                //logger.info(bufString);
+                logger.info(bufString);
                 f = getStrWithFormat(standarts, bufString, f);
             }
         } catch (Exception ex) {
@@ -204,11 +209,14 @@ public class DBConector {
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
                 case "$GPGGA":
-                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
+                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
+                    break;
                 case "$GPGSV":
-                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
+                    break;
                 case "$GPGSA":
-                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
+                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
+                    break;
                 case "$GPRMC":
                     standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
