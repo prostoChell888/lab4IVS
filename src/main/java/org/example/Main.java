@@ -22,7 +22,8 @@ public class Main {
         //createBD();
         //testBD();
 //todo здесь раздереление
-        App fileSelectExample = new App();fileSelectExample.setVisible(true);
+        App fileSelectExample = new App();
+        fileSelectExample.setVisible(true);
 
     }
 

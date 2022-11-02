@@ -87,7 +87,6 @@ public class DBCConnector {
         ps.setString(11, standarts.gga.getAgeOfDiffCorr());
 
         ps.executeUpdate();
-
     }
 
     private void sendRmcToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
@@ -341,6 +340,38 @@ public class DBCConnector {
             str.add(Integer.toString(set.getInt("satellites_used")));
             str.add(Float.toString(set.getFloat("HDOP")));
             str.add(set.getString("units2"));
+
+            table.add(str);
+        }
+
+        return table;
+    }
+
+    public List<List<String>> getGSV_inf() throws SQLException {
+
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " +
+                "       date_of_locate, " +
+                "       satellite_id, " +
+                "       azimuth, " +
+                "       elevation, " +
+                "       snr_c_no " +
+                "FROM gsv " +
+                "         JOIN location_information USING (location_information_id) " +
+                "ORDER BY  UTC_date;";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(Integer.toString(set.getInt("satellite_id")));
+            str.add(Integer.toString(set.getInt("elevation")));
+            str.add(Integer.toString(set.getInt("azimuth")));
+            str.add(Integer.toString(set.getInt("snr_c_no")));
 
             table.add(str);
         }

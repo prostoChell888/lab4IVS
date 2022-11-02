@@ -1,6 +1,8 @@
-package org.example;
+package org.example.notUse;
 
 
+
+import org.example.notUse.Location;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

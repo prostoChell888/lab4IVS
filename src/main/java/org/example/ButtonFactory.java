@@ -107,7 +107,7 @@ public class ButtonFactory {
                     case "GGA": jTable = getGGA_table(connection);break;
                     case "RMC": jTable = getRMC_table(connection);break;
                     case "GSA": jTable = getGSA_table(connection);break;
-                    //case "GSV": jTable = getGSV_table(connection);break;
+                    case "GSV": jTable = getGSV_table(connection);break;
                 }
 
                 FramePrinter.printNewTableWindow(frame, connection, jTable);
@@ -147,11 +147,11 @@ public class ButtonFactory {
     }
 
 
-//    private static JTable getGSV_table(DBCConnector connector) {
-//        String[] header = {"Время ч.", "Дата", "ID спутник", "азмут", "радиус", "Сила сигнала"};
-//        List<List<String>> data = connector.getGSV_inf();
-//        return getJTable(data, header);
-//    }
+    private static JTable getGSV_table(DBCConnector connector) throws SQLException {
+        String[] header = {"Время ч.", "Дата", "ID спутник", "азмут", "радиус", "Сила сигнала"};
+        List<List<String>> data = connector.getGSV_inf();
+        return getJTable(data, header);
+    }
 
 
     private static JTable getJTable(List<List<String>> data, String[] handle) {
