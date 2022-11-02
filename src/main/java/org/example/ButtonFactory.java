@@ -41,7 +41,7 @@ public class ButtonFactory {
                 DBCConnector dbConector = new DBCConnector(DB_URL, DB_USERNAME, DB_PASSWORD);
                 //dbConector.addInfoFromRafFile(holderFirstFile.file); todo раскоментировать
                 System.out.println("все ок");
-                FramePrinter.printNewTableWindow(frame, dbConector, new JTable());
+                FramePrinter.printNewTableWindow(frame, dbConector, getGGA_table(dbConector), "GGA");
             } catch (Exception e) {
                 try {
                     if (holderFirstFile.file == null) {
@@ -94,13 +94,15 @@ public class ButtonFactory {
     }
 
 
-    public static JComboBox createFormatChoserButton(JFrame frame, DBCConnector connection) {
+    public static JComboBox createFormatChoserButton(JFrame frame, DBCConnector connection, String defaultChoice) {
         var choose = new String[]{"GGA", "RMC", "GSA", "GSV"};
         JComboBox<String> comboBox = new JComboBox<>(choose);
+        comboBox.setSelectedItem(defaultChoice);
 
         comboBox.addActionListener(al -> {
             JComboBox box = (JComboBox) al.getSource();
             String item = (String) box.getSelectedItem();
+
             JTable jTable = new JTable();
             try {
                 switch (Objects.requireNonNull(item)) {
@@ -110,7 +112,7 @@ public class ButtonFactory {
                     case "GSV": jTable = getGSV_table(connection);break;
                 }
 
-                FramePrinter.printNewTableWindow(frame, connection, jTable);
+                FramePrinter.printNewTableWindow(frame, connection, jTable, item);
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -169,14 +171,7 @@ public class ButtonFactory {
             (List<Double> cords, List<Location> locationList, StringBuilder nameOfAxis) {
         Font font = new Font("Verdana", Font.PLAIN, 18);
 
-        String[] items = {
-                "Направление",
-                "Время",
-                "Широта",
-                "Долгота",
-                "Высота",
-                "скорость"
-        };
+        String[] items = {"Направление", "Время", "Широта", "Долгота", "Высота", "скорость"};
 
         ActionListener actionListener = e -> {
             JComboBox box = (JComboBox) e.getSource();

@@ -51,7 +51,7 @@ public class FramePrinter {
         frame.repaint();
     }
 
-    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable) throws Exception {
+    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice) throws Exception {
         //TODO сделать окно с выводм таблицы
         // и выбором формата в котором нужно выводить
         //                              скайплот
@@ -75,13 +75,19 @@ public class FramePrinter {
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(0, 1, 5, 12));
-        jPanel.add(new JLabel("Выберете\nформат"));
-        jPanel.add(ButtonFactory.createFormatChoserButton(frame, connector));
+
+
+
+
+
+        jPanel.add(new JLabel("Выберете\n формат"));
+        jPanel.add(ButtonFactory.createFormatChoserButton(frame, connector, defaultChoice));
 
 
         container.add(jPanel, BorderLayout.WEST);
 
         JScrollPane scrollPane = new JScrollPane(jTable);
+
         container.add(scrollPane, BorderLayout.CENTER);
 
         frame.revalidate();
