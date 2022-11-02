@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.notUse.Location;
 import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
 import org.jfree.chart.ChartFactory;
@@ -12,7 +13,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +29,9 @@ public class FramePrinter {
                 (BorderFactory.createEmptyBorder
                         (20, 10, 20, 10));
 
-        // Панель содержимого
         Container container = frame.getContentPane();
         container.removeAll();
-        // Устанавливаем менеджер последовательного расположения
+
         container.setLayout(new GridLayout
                 (2, 0, 10, 50));
 
@@ -52,28 +51,38 @@ public class FramePrinter {
         frame.repaint();
     }
 
-    public static void printGeneralWindow(JFrame frame, DBCConnector connector) throws Exception {
+    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable) throws Exception {
+        //TODO сделать окно с выводм таблицы
+        // и выбором формата в котором нужно выводить
+        //                              скайплот
+        //                              маршрут
+        //                              график зависимости от времени
+        frame.setSize(1000, 800);
+        frame.setResizable(true);
 
         Container container = frame.getContentPane();
         container.removeAll();
         container.setLayout(new BorderLayout());
 
-        JPanel jPanel = new JPanel();
-        container.add(jPanel, BorderLayout.NORTH);
 
         JToolBar jToolBar = new JToolBar("Запросы");
-        jPanel.add(jToolBar);
+        container.add(jToolBar, BorderLayout.NORTH);
 
-        jToolBar.add(new Button("1111"));
-        jToolBar.add(new Button("1111"));
-        jToolBar.add(new Button("1111"));
-        jToolBar.add(new Button("1111"));
+        jToolBar.add(new Button("Таблица"));
+        jToolBar.add(new Button("Маршрут"));
+        jToolBar.add(new Button("Скайплот"));
+        jToolBar.add(new Button("Графики"));
 
-        JTable table = new JTable();
-        JScrollPane scrollPane = new JScrollPane(table);
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(0, 1, 5, 12));
+        jPanel.add(new JLabel("Выберете\nформат"));
+        jPanel.add(ButtonFactory.createFormatChoserButton(frame, connector));
+
+
+        container.add(jPanel, BorderLayout.WEST);
+
+        JScrollPane scrollPane = new JScrollPane(jTable);
         container.add(scrollPane, BorderLayout.CENTER);
-
-
 
         frame.revalidate();
         frame.repaint();
@@ -93,7 +102,7 @@ public class FramePrinter {
         frame.setResizable(true);
         frame.setSize(1300, 700);
 
-        JTable table = getjTable(listWithCoordinates);
+        JTable table  = new JTable(); // = getjTable(listWithCoordinates);
         JScrollPane scrollPane = new JScrollPane(table);
         container.add(scrollPane, BorderLayout.CENTER);
 
@@ -132,31 +141,9 @@ public class FramePrinter {
 
     }
 
-    private static JTable getjTable(List<Location> listWithCoordinates) {
 
-        String[] columnNames = {"Идентификационный Код",
-                "Дата", "Время (часы)", "Широта(градусы)", "N/S", "Долгота(градусы)",
-                "E/W", "Скорость (км/ч)",
-                "Направление(градусы)", "Высота(градусы)",
-        };
 
-        Object[][] data = new Object[listWithCoordinates.size()][columnNames.length];
 
-        for (int i = 0; i < listWithCoordinates.size(); i++) {
-            data[i][0] = listWithCoordinates.get(i).getDeviceId();
-            data[i][1] = listWithCoordinates.get(i).getDate();
-            data[i][2] = listWithCoordinates.get(i).getTimeInHours();
-            data[i][3] = listWithCoordinates.get(i).getLatitudeInDegrees();
-            data[i][4] = listWithCoordinates.get(i).getN_s();
-            data[i][5] = listWithCoordinates.get(i).getLongitudeInDegrees();
-            data[i][6] = listWithCoordinates.get(i).getE_v();
-            data[i][7] = listWithCoordinates.get(i).getSpeedInKilPerHour();
-            data[i][8] = listWithCoordinates.get(i).getCourse();
-            data[i][9] = listWithCoordinates.get(i).getAltitudeInDegrees();
-        }
-
-        return new JTable(data, columnNames);
-    }
 
     public static void printGraphWindow
             (JFrame frame, List<Double> listXAxis,
