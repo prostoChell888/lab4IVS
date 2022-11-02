@@ -139,7 +139,7 @@ public class ButtonFactory {
         return getJTable(data, header);
     }
 
-    private static JTable getGSA_table(DBCConnector connector) {
+    private static JTable getGSA_table(DBCConnector connector) throws SQLException {
         String[] header = {"Время ч.", "Дата", "PDOP", "HDOP", "VDOP", "Режим 1", "Режим 2"};
         List<List<String>> data = connector.getGSA_inf();
 

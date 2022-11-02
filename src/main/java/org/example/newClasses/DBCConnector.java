@@ -3,11 +3,13 @@ package org.example.newClasses;
 import org.example.FormatClases.GSV;
 import org.example.FormatClases.PosInform;
 import org.example.FormatClases.Standarts;
-import org.example.MyFormater;
+import org.example.notUse.MyFormater;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.*;
 
 public class DBCConnector {
@@ -29,6 +31,8 @@ public class DBCConnector {
     }
 
 
+
+
     public void addInfoFromRafFile(File file) throws Exception {
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -38,7 +42,7 @@ public class DBCConnector {
             boolean isEmpty = true;
             while (getFormatsFromBuffer(br, standarts)) {
 
-                isEmpty = checkAvailabilityOfinfo(standarts);
+                isEmpty = checkAvailabilityOfInfo(standarts);
                 int idOfLocationInformation = sendLocationInformToBd(standarts);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
                 sendGSVToBD(standarts, idOfLocationInformation, idOfGSA);
@@ -53,13 +57,13 @@ public class DBCConnector {
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
-    }
+            throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
+        }
     }
 
-    private boolean checkAvailabilityOfinfo(Standarts standarts) {
+    private boolean checkAvailabilityOfInfo(Standarts standarts) {
         return standarts.gga == null && standarts.rmc == null &&
-                standarts.gsa == null &&  standarts.gsv.size() == 0;
+                standarts.gsa == null && standarts.gsv.size() == 0;
     }
 
     private void sendGgaToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
@@ -211,9 +215,15 @@ public class DBCConnector {
 
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
-                case "$GPGGA": standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
-                case "$GPGSV": standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
-                case "$GPGSA": standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
+                case "$GPGGA":
+                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
+                    break;
+                case "$GPGSV":
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
+                    break;
+                case "$GPGSA":
+                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
+                    break;
                 case "$GPRMC":
                     standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
@@ -225,5 +235,116 @@ public class DBCConnector {
             throw ex;
         }
         return f;
+    }
+
+    public List<List<String>> getGSA_inf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " +
+                "       date_of_locate, " +
+                "       PDOP, " +
+                "       HDOP, " +
+                "       VDOP, " +
+                "       mode1, " +
+                "       mode2 " +
+                "FROM gsa " +
+                "         JOIN location_information USING (location_information_id) " +
+                "ORDER BY  UTC_date;";
+
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(set.getString("mode1"));
+            str.add(Integer.toString(set.getInt("mode2")));
+            str.add(Float.toString(set.getFloat("PDOP")));
+            str.add(Float.toString(set.getFloat("HDOP")));
+            str.add(Float.toString(set.getFloat("VDOP")));
+
+            table.add(str);
+        }
+
+        return table;
+    }
+
+    public  List<List<String>> getRMC_inf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " +
+                "       date_of_locate, " +
+                "       latitude, " +
+                "       N_S_indicator, " +
+                "       longitude, " +
+                "       E_W_Indicator, " +
+                "       speed_over_ground, " +
+                "       course_over_ground " +
+                "FROM rmc" +
+                "         JOIN location_information USING (location_information_id) " +
+                "         JOIN pos_inform USING (pos_inform_id) " +
+                "ORDER BY UTC_date;";
+
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(Float.toString(set.getFloat("latitude")));
+            str.add(set.getString("N_S_indicator"));
+            str.add(Float.toString(set.getFloat("longitude")));
+            str.add(set.getString("E_W_Indicator"));
+            str.add(Float.toString(set.getFloat("speed_over_ground")));
+            str.add(Float.toString(set.getFloat("course_over_ground")));
+
+            table.add(str);
+        }
+
+        return table;
+    }
+
+    public List<List<String>> getGGA_inf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " +
+                "       date_of_locate, " +
+                "       latitude, " +
+                "       N_S_indicator, " +
+                "       longitude, " +
+                "       E_W_Indicator, " +
+                "       position_fix_indicator, " +
+                "       satellites_used, " +
+                "       HDOP, " +
+                "       units2 " +
+                "FROM gga " +
+                "         JOIN location_information USING (location_information_id) " +
+                "         JOIN pos_inform USING (pos_inform_id) " +
+                "ORDER BY  UTC_date;";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(Float.toString(set.getFloat("latitude")));
+            str.add(set.getString("N_S_indicator"));
+            str.add(Float.toString(set.getFloat("longitude")));
+            str.add(set.getString("E_W_Indicator"));
+            str.add(Integer.toString(set.getInt("position_fix_indicator")));
+            str.add(Integer.toString(set.getInt("satellites_used")));
+            str.add(Float.toString(set.getFloat("HDOP")));
+            str.add(set.getString("units2"));
+
+            table.add(str);
+        }
+
+        return table;
     }
 }
