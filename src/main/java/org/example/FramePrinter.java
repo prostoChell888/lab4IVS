@@ -160,8 +160,7 @@ public class FramePrinter {
         container.add(jPanel, BorderLayout.WEST);
 
         jPanel.add(new JLabel("<html>Выберите<br/>навигационные<br/>параметры</html>"));
-        jPanel.add(ButtonFactory.createComboBoxChooseAxis
-                (frame, connector, namesOfAxes, dataset));
+        jPanel.add(ButtonFactory.createComboBoxChooseAxis(frame, connector, namesOfAxes));
 
 
 

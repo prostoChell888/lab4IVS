@@ -1,6 +1,5 @@
 package org.example;
 
-import org.example.notUse.Location;
 import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -10,7 +9,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
@@ -110,7 +108,6 @@ public class ButtonFactory {
         });
 
 
-
         return jButton;
     }
 
@@ -127,13 +124,20 @@ public class ButtonFactory {
             JTable jTable = new JTable();
             try {
                 switch (Objects.requireNonNull(item)) {
-                    case "GGA": jTable = getGGA_table(connection);break;
-                    case "RMC": jTable = getRMC_table(connection);break;
-                    case "GSA": jTable = getGSA_table(connection);break;
-                    case "GSV": jTable = getGSV_table(connection);break;
+                    case "GGA":
+                        jTable = getGGA_table(connection);
+                        break;
+                    case "RMC":
+                        jTable = getRMC_table(connection);
+                        break;
+                    case "GSA":
+                        jTable = getGSA_table(connection);
+                        break;
+                    case "GSV":
+                        jTable = getGSV_table(connection);
+                        break;
                 }
                 FramePrinter.printNewTableWindow(frame, connection, jTable, item);
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -193,25 +197,27 @@ public class ButtonFactory {
     public static JComboBox<String> createComboBoxChooseAxis
             (JFrame frame, DBCConnector connection, NamesOfAxes namesOfAxes) {
 
-
-        String[] items = {"скорость", "Широта", "Долгота","Направление", "Высота" };
+        String[] items = {"latitude", "longitude", "MSL_altitude"};
         JComboBox<String> comboBox = new JComboBox<>(items);
+
         comboBox.setSelectedItem(namesOfAxes.getNameOfX());
-
-
         comboBox.setSelectedItem(namesOfAxes.getNameOfY());
+
         comboBox.addActionListener(e -> {
             JComboBox box = (JComboBox) e.getSource();
             String item = (String) box.getSelectedItem();
-            XYDataset dataset;
-            switch (item) {
-                case "Широта": dataset = getLatitudeDataSet(); break;
-                case "Долгота": dataset = getLongitudeDataSet(); break;
-                case "Высота": dataset = getAltitudeDataSet(); break;
-                case "Направление": dataset = getCourseDataSet(); break;
-                case "скорость": dataset = getSpeedInKilPerHourDataSet(); break;
 
-            }
+            namesOfAxes.setNameOfY(item);
+            namesOfAxes.setNameOfX("UTC_date");
+
+            try {
+                List<Float> listXCord = connection.getLocationInf("UTC_date");
+                List<Float> listYCord = connection.getLocationInf(item);
+                XYDataset dataset = createDataset(listXCord, listYCord);
+
+                FramePrinter.printNewGraphWindow(frame, connection, dataset, namesOfAxes);
+
+            } catch (Throwable ex) {throw new RuntimeException(ex);}
         });
 
         Font font = new Font("Verdana", Font.PLAIN, 18);
@@ -221,19 +227,12 @@ public class ButtonFactory {
         return comboBox;
     }
 
-    private static XYDataset getLatitudeDataSet(DBCConnector connector) throws SQLException {
-        List<Double> listXCord = connector.getLocationInf("UTC_date");
-        List<Double> listYCord = connector.getLocationInf("latitude");
-        XYDataset dataset = createDataset(listXCord, listYCord);
-
-
-
-    }
 
     private static XYDataset createDataset
-            (List<Double> listXAxis, List<Double> listYAxis) {
-        XYSeriesCollection dataset = new XYSeriesCollection();
+            (List<Float> listXAxis, List<Float> listYAxis) throws Throwable {
+        if (listXAxis.size() != listYAxis.size()) throw new Throwable("Данные листы не сопастовимы");
 
+        XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("");
 
         for (int i = 0; i < listXAxis.size(); i++) {

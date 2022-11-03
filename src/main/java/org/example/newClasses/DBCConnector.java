@@ -31,8 +31,6 @@ public class DBCConnector {
     }
 
 
-
-
     public void addInfoFromRafFile(File file) throws Exception {
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -270,7 +268,7 @@ public class DBCConnector {
         return table;
     }
 
-    public  List<List<String>> getRMC_inf() throws SQLException {
+    public List<List<String>> getRMC_inf() throws SQLException {
         /* language=SQL */
         String sql = "SELECT UTC_date, " +
                 "       date_of_locate, " +
@@ -377,5 +375,22 @@ public class DBCConnector {
         }
 
         return table;
+    }
+
+    public List<Float> getLocationInf(String parameter) throws SQLException {
+        // language=SQL
+        String sql = "SELECT " + parameter + " FROM  gga " +
+                "JOIN location_information USING (location_information_id) " +
+                "         JOIN pos_inform USING (pos_inform_id) " +
+                "ORDER BY UTC_date";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+
+        List<Float> data = new ArrayList<>();
+
+        while (set.next()) data.add(set.getFloat(parameter));
+
+        return data;
     }
 }

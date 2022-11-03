@@ -10,6 +10,13 @@ public class NamesOfAxes {
     private String nameOfX;
     private String nameOfY;
 
+    public void setNameOfX(String nameOfX) {
+        this.nameOfX = nameOfX;
+    }
+
+    public void setNameOfY(String nameOfY) {
+        this.nameOfY = nameOfY;
+    }
 
     public String getNameOfX() {
         return nameOfX;
