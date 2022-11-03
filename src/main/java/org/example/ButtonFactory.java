@@ -5,6 +5,8 @@ import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
@@ -189,7 +191,7 @@ public class ButtonFactory {
     }
 
     public static JComboBox<String> createComboBoxChooseAxis
-            (JFrame frame, DBCConnector connection, NamesOfAxes namesOfAxes, XYDataset dataset) {
+            (JFrame frame, DBCConnector connection, NamesOfAxes namesOfAxes) {
 
 
         String[] items = {"скорость", "Широта", "Долгота","Направление", "Высота" };
@@ -201,28 +203,14 @@ public class ButtonFactory {
         comboBox.addActionListener(e -> {
             JComboBox box = (JComboBox) e.getSource();
             String item = (String) box.getSelectedItem();
-
+            XYDataset dataset;
             switch (item) {
-                case "Широта":
-                    for (var cord : locationList)
-                        cords.add(cord.getLatitudeInDegrees());
-                    break;
-                case "Долгота":
-                    for (var cord : locationList)
-                        cords.add(cord.getLongitudeInDegrees());
-                    break;
-                case "Высота":
-                    for (var cord : locationList)
-                        cords.add(cord.getAltitudeInDegrees());
-                    break;
-                case "Направление":
-                    for (var cord : locationList)
-                        cords.add(cord.getCourse());
-                    break;
-                case "скорость":
-                    for (var cord : locationList)
-                        cords.add(cord.getSpeedInKilPerHour());
-                    break;
+                case "Широта": dataset = getLatitudeDataSet(); break;
+                case "Долгота": dataset = getLongitudeDataSet(); break;
+                case "Высота": dataset = getAltitudeDataSet(); break;
+                case "Направление": dataset = getCourseDataSet(); break;
+                case "скорость": dataset = getSpeedInKilPerHourDataSet(); break;
+
             }
         });
 
@@ -231,6 +219,29 @@ public class ButtonFactory {
         comboBox.setAlignmentX(LEFT_ALIGNMENT);
 
         return comboBox;
+    }
+
+    private static XYDataset getLatitudeDataSet(DBCConnector connector) throws SQLException {
+        List<Double> listXCord = connector.getLocationInf("UTC_date");
+        List<Double> listYCord = connector.getLocationInf("latitude");
+        XYDataset dataset = createDataset(listXCord, listYCord);
+
+
+
+    }
+
+    private static XYDataset createDataset
+            (List<Double> listXAxis, List<Double> listYAxis) {
+        XYSeriesCollection dataset = new XYSeriesCollection();
+
+        XYSeries series = new XYSeries("");
+
+        for (int i = 0; i < listXAxis.size(); i++) {
+            series.add(listXAxis.get(i), listYAxis.get(i));
+        }
+
+        dataset.addSeries(series);
+        return dataset;
     }
 
 //    public static JButton createGraphButton
