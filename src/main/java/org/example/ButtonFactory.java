@@ -3,6 +3,8 @@ package org.example;
 import org.example.notUse.Location;
 import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,19 +17,19 @@ import static java.awt.Component.LEFT_ALIGNMENT;
 
 public class ButtonFactory {
 
-    public static JButton createTable(JFrame frame, List<Location> listWithCoordinates) {
-        JButton jButton = new JButton("Таблица");
-
-        jButton.addActionListener(x -> {
-            try {
-                FramePrinter.printTableWindow(frame, listWithCoordinates);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        return jButton;
-    }
+//    public static JButton createTable(JFrame frame, List<Location> listWithCoordinates) {
+//        JButton jButton = new JButton("Таблица");
+//
+//        jButton.addActionListener(x -> {
+//            try {
+//                FramePrinter.printTableWindow(frame, listWithCoordinates);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//
+//        return jButton;
+//    }
 
     public static JButton createOpenButton(JFrame frame, FilesHolder holderFirstFile) throws Exception {
         JButton jButton = new JButton("Открыть");
@@ -90,6 +92,23 @@ public class ButtonFactory {
                 throw new RuntimeException(e);
             }
         });
+
+        return jButton;
+    }
+
+    public static JButton creteNewTablesButton(JFrame frame, DBCConnector connector) {
+        JButton jButton = new JButton("Таблицы");
+        jButton.addActionListener(x -> {
+            try {
+                FramePrinter.printNewTableWindow(frame, connector,
+                        getGGA_table(connector), "GGA");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+
         return jButton;
     }
 
@@ -111,16 +130,18 @@ public class ButtonFactory {
                     case "GSA": jTable = getGSA_table(connection);break;
                     case "GSV": jTable = getGSV_table(connection);break;
                 }
-
                 FramePrinter.printNewTableWindow(frame, connection, jTable, item);
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+        Font font = new Font("Verdana", Font.PLAIN, 18);
+        comboBox.setFont(font);
+        comboBox.setAlignmentX(LEFT_ALIGNMENT);
+
         return comboBox;
     }
-
 
 
     private static JTable getGGA_table(DBCConnector connector) throws SQLException {
@@ -148,13 +169,12 @@ public class ButtonFactory {
         return getJTable(data, header);
     }
 
-
     private static JTable getGSV_table(DBCConnector connector) throws SQLException {
         String[] header = {"Время ч.", "Дата", "ID спутник", "азмут", "радиус", "Сила сигнала"};
         List<List<String>> data = connector.getGSV_inf();
+
         return getJTable(data, header);
     }
-
 
     private static JTable getJTable(List<List<String>> data, String[] handle) {
         var dataForTable = new String[data.size()][data.get(0).size()];
@@ -164,26 +184,25 @@ public class ButtonFactory {
                 dataForTable[i][j] = data.get(i).get(j);
             }
         }
+
         return new JTable(dataForTable, handle);
     }
 
     public static JComboBox<String> createComboBoxChooseAxis
-            (List<Double> cords, List<Location> locationList, StringBuilder nameOfAxis) {
-        Font font = new Font("Verdana", Font.PLAIN, 18);
+            (JFrame frame, DBCConnector connection, NamesOfAxes namesOfAxes, XYDataset dataset) {
 
-        String[] items = {"Направление", "Время", "Широта", "Долгота", "Высота", "скорость"};
 
-        ActionListener actionListener = e -> {
+        String[] items = {"скорость", "Широта", "Долгота","Направление", "Высота" };
+        JComboBox<String> comboBox = new JComboBox<>(items);
+        comboBox.setSelectedItem(namesOfAxes.getNameOfX());
+
+
+        comboBox.setSelectedItem(namesOfAxes.getNameOfY());
+        comboBox.addActionListener(e -> {
             JComboBox box = (JComboBox) e.getSource();
             String item = (String) box.getSelectedItem();
-            nameOfAxis.setLength(0);
-            nameOfAxis.append(item);
-            switch (item) {
-                case "Время":
 
-                    for (var cord : locationList)
-                        cords.add(cord.getTimeInHours());
-                    break;
+            switch (item) {
                 case "Широта":
                     for (var cord : locationList)
                         cords.add(cord.getLatitudeInDegrees());
@@ -205,31 +224,42 @@ public class ButtonFactory {
                         cords.add(cord.getSpeedInKilPerHour());
                     break;
             }
-        };
+        });
 
-        JComboBox<String> comboBox = new JComboBox<>(items);
+        Font font = new Font("Verdana", Font.PLAIN, 18);
         comboBox.setFont(font);
         comboBox.setAlignmentX(LEFT_ALIGNMENT);
-        comboBox.addActionListener(actionListener);
 
         return comboBox;
     }
 
-    public static JButton createGraphButton
-            (JFrame frame, List<Double> listXAxis,
-             List<Double> listYAxis, StringBuilder nameOfXAxis,
-             StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
+//    public static JButton createGraphButton
+//            (JFrame frame, List<Double> listXAxis,
+//             List<Double> listYAxis, StringBuilder nameOfXAxis,
+//             StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
+//
+//        JButton jButton = new JButton("Графики");
+//
+//        ActionListener actionListener = e -> {
+//            FramePrinter.printGraphWindow(frame, listXAxis,
+//                    listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
+//        };
+//        jButton.addActionListener(actionListener);
+//
+//        return jButton;
+//    }
 
-        JButton jButton = new JButton("Построить график");
+    public static JButton createNewGraphbutton(JFrame frame, DBCConnector connector) {
+        JButton jButton = new JButton("Графики");
 
-        ActionListener actionListener = e -> {
-            FramePrinter.printGraphWindow(frame, listXAxis,
-                    listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
+        NamesOfAxes namesOfAxes = new NamesOfAxes("скорость", "Время ч.");
+        XYDataset dataset = new DefaultXYDataset();
 
-        };
-        jButton.addActionListener(actionListener);
-
+        jButton.addActionListener(x -> {
+            FramePrinter.printNewGraphWindow(frame, connector, dataset, namesOfAxes);
+        });
 
         return jButton;
+
     }
 }
