@@ -4,13 +4,25 @@ import org.example.FormatClases.GSV;
 import org.example.FormatClases.PosInform;
 import org.example.FormatClases.Standarts;
 import org.example.notUse.MyFormater;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.PolarPlot;
+import org.jfree.chart.renderer.DefaultPolarItemRenderer;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
+
+import static org.example.Main.createPolarChart;
 
 public class DBCConnector {
     Logger logger;
@@ -212,17 +224,10 @@ public class DBCConnector {
 
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
-                case "$GPGGA":
-                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
-                    break;
-                case "$GPGSV":
-                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
-                    break;
-                case "$GPGSA":
-                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
-                    break;
-                case "$GPRMC":
-                    standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
+                case "$GPGGA": standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
+                case "$GPGSV": standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
+                case "$GPGSA": standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
+                case "$GPRMC": standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
                     break;
                 default:
@@ -235,21 +240,7 @@ public class DBCConnector {
     }
 
     public List<List<String>> getGSA_inf() throws SQLException {
-        /* language=SQL */
-        String sql = "SELECT UTC_date, " +
-                "       date_of_locate, " +
-                "       PDOP, " +
-                "       HDOP, " +
-                "       VDOP, " +
-                "       mode1, " +
-                "       mode2 " +
-                "FROM gsa " +
-                "         JOIN location_information USING (location_information_id) " +
-                "ORDER BY  UTC_date;";
-
-
-        Statement st = connection.createStatement();
-        ResultSet set = st.executeQuery(sql);
+        ResultSet set = getResultSetGSAInf();
 
         List<List<String>> table = new ArrayList<>();
         while (set.next()) {
@@ -268,24 +259,27 @@ public class DBCConnector {
         return table;
     }
 
-    public List<List<String>> getRMC_inf() throws SQLException {
+    private ResultSet getResultSetGSAInf() throws SQLException {
         /* language=SQL */
         String sql = "SELECT UTC_date, " +
                 "       date_of_locate, " +
-                "       latitude, " +
-                "       N_S_indicator, " +
-                "       longitude, " +
-                "       E_W_Indicator, " +
-                "       speed_over_ground, " +
-                "       course_over_ground " +
-                "FROM rmc" +
+                "       PDOP, " +
+                "       HDOP, " +
+                "       VDOP, " +
+                "       mode1, " +
+                "       mode2 " +
+                "FROM gsa " +
                 "         JOIN location_information USING (location_information_id) " +
-                "         JOIN pos_inform USING (pos_inform_id) " +
-                "ORDER BY UTC_date;";
+                "ORDER BY  UTC_date;";
 
 
         Statement st = connection.createStatement();
         ResultSet set = st.executeQuery(sql);
+        return set;
+    }
+
+    public List<List<String>> getRMC_inf() throws SQLException {
+        ResultSet set = getResultSetRMCInf();
 
         List<List<String>> table = new ArrayList<>();
         while (set.next()) {
@@ -305,7 +299,7 @@ public class DBCConnector {
         return table;
     }
 
-    public List<List<String>> getGGA_inf() throws SQLException {
+    private ResultSet getResultSetRMCInf() throws SQLException {
         /* language=SQL */
         String sql = "SELECT UTC_date, " +
                 "       date_of_locate, " +
@@ -313,17 +307,21 @@ public class DBCConnector {
                 "       N_S_indicator, " +
                 "       longitude, " +
                 "       E_W_Indicator, " +
-                "       position_fix_indicator, " +
-                "       satellites_used, " +
-                "       HDOP, " +
-                "       units2 " +
-                "FROM gga " +
+                "       speed_over_ground, " +
+                "       course_over_ground " +
+                "FROM rmc" +
                 "         JOIN location_information USING (location_information_id) " +
                 "         JOIN pos_inform USING (pos_inform_id) " +
-                "ORDER BY  UTC_date;";
+                "ORDER BY UTC_date;";
+
 
         Statement st = connection.createStatement();
         ResultSet set = st.executeQuery(sql);
+        return set;
+    }
+
+    public List<List<String>> getGGA_inf() throws SQLException {
+        ResultSet set = getResultSetOfGGAQary();
 
         List<List<String>> table = new ArrayList<>();
         while (set.next()) {
@@ -345,21 +343,26 @@ public class DBCConnector {
         return table;
     }
 
-    public List<List<String>> getGSV_inf() throws SQLException {
-
+    private ResultSet getResultSetOfGGAQary() throws SQLException {
         /* language=SQL */
-        String sql = "SELECT UTC_date, " +
-                "       date_of_locate, " +
-                "       satellite_id, " +
-                "       azimuth, " +
-                "       elevation, " +
-                "       snr_c_no " +
-                "FROM gsv " +
+        String sql = "SELECT UTC_date, " + " date_of_locate, " + " latitude, " + " N_S_indicator, " + " longitude, " +
+                "       E_W_Indicator, " +
+                "       position_fix_indicator, " +
+                "       satellites_used, " +
+                "       HDOP, " +
+                "       units2 " +
+                "FROM gga " +
                 "         JOIN location_information USING (location_information_id) " +
+                "         JOIN pos_inform USING (pos_inform_id) " +
                 "ORDER BY  UTC_date;";
 
         Statement st = connection.createStatement();
         ResultSet set = st.executeQuery(sql);
+        return set;
+    }
+
+    public List<List<String>> getGSV_inf() throws SQLException {
+        ResultSet set = getResultSetGSVinf();
 
         List<List<String>> table = new ArrayList<>();
         while (set.next()) {
@@ -377,6 +380,17 @@ public class DBCConnector {
         return table;
     }
 
+    private ResultSet getResultSetGSVinf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " + " date_of_locate, " + " satellite_id, " + " azimuth, " + " elevation, " +
+                "       snr_c_no " + "FROM gsv " + "  JOIN location_information USING (location_information_id) " +
+                "ORDER BY  UTC_date;";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+        return set;
+    }
+
     public List<Float> getLocationInf(String parameter) throws SQLException {
         // language=SQL
         String sql = "SELECT " + parameter + " FROM  gga " +
@@ -392,5 +406,61 @@ public class DBCConnector {
         while (set.next()) data.add(set.getFloat(parameter));
 
         return data;
+    }
+
+
+    public JFreeChart getSputniksPosighions() throws SQLException {
+        List<Integer> listOfSputniksId = getListOfSputniksId();
+        XYSeriesCollection xyDataset = new XYSeriesCollection();
+        for (var sputId : listOfSputniksId) {
+            /* language=SQL */
+            StringBuilder sql2 = new StringBuilder("SELECT elevation, azimuth " +
+                    "FROM gsv " +
+                    "WHERE satellite_id = ");
+            Statement state1 = connection.createStatement();
+            sql2.append(sputId);
+            ResultSet cordinates = state1.executeQuery(sql2.toString());
+
+            List<Integer> listOfElevation = new ArrayList<>();
+            List<Integer> listOfAzimut = new ArrayList<>();
+
+            XYSeries series = new XYSeries(sputId);
+            while (cordinates.next()) {
+                listOfAzimut.add(cordinates.getInt(1));
+                listOfElevation.add(cordinates.getInt(2));
+
+                series.add(90 - listOfAzimut.get(listOfAzimut.size() - 1) ,
+                        listOfElevation.get(listOfElevation.size() - 1));
+            }
+            xyDataset.addSeries(series);
+        }
+
+        return createPolarChart("Skyplot", xyDataset, true, false, true);
+    }
+
+    private List<Integer> getListOfSputniksId() throws SQLException {
+        String sql = "SELECT DISTINCT(satellite_id)" +
+                "FROM gsv;";
+
+        Statement statement = connection.createStatement();
+        ResultSet result = statement.executeQuery(sql);
+
+        List<Integer> listOfSputniksId = new ArrayList<>();
+        while (result.next()) listOfSputniksId.add(result.getInt(1));
+        return listOfSputniksId;
+    }
+
+    public static JFreeChart createPolarChart(String title, XYDataset dataset,
+                                              boolean legend, boolean tooltips, boolean urls) {
+        PolarPlot plot = new PolarPlot();
+        plot.setDataset(dataset);
+        NumberAxis rangeAxis = new NumberAxis();
+        rangeAxis.setAxisLineVisible(false);
+        rangeAxis.setTickMarksVisible(false);
+        rangeAxis.setTickLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
+        plot.setAxis(rangeAxis);
+        plot.setRenderer(new DefaultPolarItemRenderer());
+
+        return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
     }
 }
