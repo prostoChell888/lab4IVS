@@ -13,7 +13,6 @@ public class Standarts {
     public GSA gsa = null;
     public List<GSV> gsv;
     public RMC rmc = null;
-
     public Standarts() {
         gsv = new ArrayList<>();
     }

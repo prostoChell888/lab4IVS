@@ -1,26 +1,22 @@
 package org.example;
 
-import org.example.notUse.Location;
 import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FramePrinter {
 
 
-
-    public static void printDownloudWindow(JFrame frame, String fileStatus) throws Exception {
+    public static void printDownloudWindow(JFrame frame, String fileStatus, DBCConnector dbConector) throws Exception {
         frame.setSize(300, 200);
         frame.setResizable(false);
         frame.getRootPane().setBorder
@@ -38,7 +34,7 @@ public class FramePrinter {
         JLabel status = new JLabel(fileStatus);
         JButton buttonChooseFile = ButtonFactory.createButtonChooseFile(status, holderFirstFile);
 
-        JButton buttonOpen = ButtonFactory.createOpenButton(frame, holderFirstFile);
+        JButton buttonOpen = ButtonFactory.createOpenButton(frame, holderFirstFile, dbConector);
 
         container.add(jl);
         container.add(buttonChooseFile);
@@ -49,12 +45,8 @@ public class FramePrinter {
         frame.repaint();
     }
 
-    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice) throws Exception {
-        //TODO сделать окно с выводм таблицы
-        // и выбором формата в котором нужно выводить
-        //                              скайплот
-        //                              маршрут
-        //                              график зависимости от времени
+    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice) throws Throwable {
+
         frame.setSize(1000, 800);
         frame.setResizable(true);
 
@@ -67,9 +59,9 @@ public class FramePrinter {
         container.add(jToolBar, BorderLayout.NORTH);
 
         jToolBar.add(new JButton("Таблица"));
-        jToolBar.add(new JButton("Маршрут"));
-        jToolBar.add(new JButton("Скайплот"));
-        jToolBar.add(ButtonFactory.createNewGraphbutton( frame,  connector));
+        jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(0, 1, 5, 12));
@@ -139,7 +131,7 @@ public class FramePrinter {
 //    }
 
     public static void printNewGraphWindow(JFrame frame, DBCConnector connector,
-                                           XYDataset dataset,NamesOfAxes namesOfAxes) {
+                                           XYDataset dataset, NamesOfAxes namesOfAxes) throws Throwable {
         frame.setSize(1000, 800);
         frame.setResizable(true);
 
@@ -151,8 +143,8 @@ public class FramePrinter {
         container.add(jToolBar, BorderLayout.NORTH);
 
         jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
-        jToolBar.add(new JButton("Маршрут"));
-        jToolBar.add(new JButton("Скайплот"));
+        jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(new JButton("Графики"));
 
         JPanel jPanel = new JPanel();
@@ -161,8 +153,6 @@ public class FramePrinter {
 
         jPanel.add(new JLabel("<html>Выберите<br/>навигационные<br/>параметры</html>"));
         jPanel.add(ButtonFactory.createComboBoxChooseAxis(frame, connector, namesOfAxes));
-
-
 
         JFreeChart chart = ChartFactory.createScatterPlot(
                 "График зависимости",
@@ -177,8 +167,6 @@ public class FramePrinter {
         frame.revalidate();
         frame.repaint();
     }
-
-
 
 
 //    public static void printGraphWindow
@@ -229,5 +217,62 @@ public class FramePrinter {
 
         dataset.addSeries(series);
         return dataset;
+    }
+
+    public static void printNewSkyplotWindow(JFrame frame, DBCConnector connector) throws Throwable {
+        frame.setSize(1000, 800);
+        frame.setResizable(true);
+
+        Container container = frame.getContentPane();
+        container.removeAll();
+        container.setLayout(new BorderLayout());
+
+        JToolBar jToolBar = new JToolBar("Запросы");
+        container.add(jToolBar, BorderLayout.NORTH);
+
+        jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
+        jToolBar.add(new JButton("Скайплот"));
+        jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+
+        JFreeChart chart = connector.getSputniksPosighions();
+
+        container.add(new ChartPanel(chart), BorderLayout.CENTER);
+
+        frame.revalidate();
+        frame.repaint();
+
+    }
+
+    public static void printNewRotePrinter(JFrame frame, DBCConnector connector, XYDataset dataset) throws Throwable {
+        frame.setSize(1000, 800);
+        frame.setResizable(true);
+
+        Container container = frame.getContentPane();
+        container.removeAll();
+        container.setLayout(new BorderLayout());
+
+        JToolBar jToolBar = new JToolBar("Запросы");
+        container.add(jToolBar, BorderLayout.NORTH);
+
+        jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
+        jToolBar.add(new JButton("Маршрут"));
+        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+
+
+        JFreeChart chart = ChartFactory.createScatterPlot(
+                "Маршрут",
+                "latitude",//x
+                "longitude",//y
+                dataset);
+
+        ChartPanel panel = new ChartPanel(chart);
+        container.add(panel, BorderLayout.CENTER);
+
+        //container.add(new ChartPanel(chart), BorderLayout.CENTER);
+
+        frame.revalidate();
+        frame.repaint();
     }
 }

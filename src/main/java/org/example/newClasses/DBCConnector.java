@@ -463,4 +463,15 @@ public class DBCConnector {
 
         return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
     }
+
+
+    public  void deletingTableData() throws SQLException {
+        String sql = "TRUNCATE TABLE  pos_inform CASCADE; " +
+                " TRUNCATE TABLE  location_information CASCADE;";
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(sql);
+    }
+
+
 }

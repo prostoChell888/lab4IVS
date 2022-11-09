@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.newClasses.DBCConnector;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -12,24 +13,64 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        //createBD();
-       // testBD();
-//todo здесь раздереление
+    public static void main(String[] args) throws Throwable {
+     //createBD();
+//        testBD();
+
+
         App fileSelectExample = new App();
         fileSelectExample.setVisible(true);
 
+        //todo здесь раздереление
+
+//        String DB_USERNAME = "postgres";
+//        String DB_PASSWORD = "123";
+//        String DB_URL = "jdbc:postgresql://localhost:5432/interfacec2";
+//
+//        DBCConnector dbConector = new DBCConnector(DB_URL, DB_USERNAME, DB_PASSWORD);
+//
+//        List<Float> listXCord = dbConector.getLocationInf("latitude");
+//        List<Float> listYCord = dbConector.getLocationInf("longitude");
+//        XYDataset dataset = createDataset(listXCord, listYCord);
+//
+//        JFreeChart chart = ChartFactory.createScatterPlot(
+//                "График зависимости",
+//                "namesOfAxes.getNameOfX()",//x
+//                "namesOfAxes.getNameOfY()",//y
+//                dataset);
+//
+//        JFrame frame = new JFrame("MinimalStaticChart");
+//        // Помещаем график на фрейм
+//        frame.getContentPane().add(new ChartPanel(chart));
+//        frame.setSize(600,600);
+//        frame.show();
+}
+
+    private static XYDataset createDataset
+            (List<Float> listXAxis, List<Float> listYAxis) throws Throwable {
+        if (listXAxis.size() != listYAxis.size()) throw new Throwable("Данные листы не сопастовимы");
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        XYSeries series = new XYSeries("");
+
+        for (int i = 0; i < listXAxis.size(); i++) {
+            series.add(listXAxis.get(i) * 1000000000, listYAxis.get(i) * 1000000000);
+        }
+
+        dataset.addSeries(series);
+        return dataset;
     }
 
     private static void createBD() throws Exception {
         try {
-            File file = new File("D:\\sem5\\interfases\\Теория к лабам\\2 лаба\\20210930 1 (2).raw");
+            File file = new File("D:\\sem5\\interfases\\Теория к лабам\\2 лаба\\2019 01 20 41a");
             String DB_USERNAME = "postgres";
             String DB_PASSWORD = "123";
             String DB_URL = "jdbc:postgresql://localhost:5432/interfacec2";
@@ -80,6 +121,7 @@ public class Main {
 
                 listOfAzimut.add(cordinates.getInt(1));
                 listOfElevation.add(cordinates.getInt(2));
+
                 series.add(listOfAzimut.get(listOfAzimut.size() - 1),
                         listOfElevation.get(listOfElevation.size() - 1));
                 System.out.println("Azimut = " +
@@ -89,9 +131,15 @@ public class Main {
             xyDataset.addSeries(series);
 
         }
+        //========================
+        XYSeriesCollection xyDataset2 = new XYSeriesCollection();
 
+        XYSeries series = new XYSeries(1);
+        series.add(359, 200);
+        xyDataset2.addSeries(series);
+        //==========================
 
-        JFreeChart chart = createPolarChart("пРОБУЮ", xyDataset, true, false, true);
+        JFreeChart chart = createPolarChart("Skyplot", xyDataset2, true, false, true);
         JFrame frame =
                 new JFrame("MinimalStaticChart");
         // Помещаем график на фрейм
@@ -110,8 +158,8 @@ public class Main {
         PolarPlot plot = new PolarPlot();
         plot.setDataset(dataset);
         NumberAxis rangeAxis = new NumberAxis();
-        rangeAxis.setAxisLineVisible(false);
-        rangeAxis.setTickMarksVisible(false);
+        rangeAxis.setAxisLineVisible(true);
+        rangeAxis.setTickMarksVisible(true);
         rangeAxis.setTickLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
         plot.setAxis(rangeAxis);
         plot.setRenderer(new DefaultPolarItemRenderer());

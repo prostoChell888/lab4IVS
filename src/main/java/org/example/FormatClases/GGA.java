@@ -20,10 +20,10 @@ public class GGA {
     private double strToDegree(String value) {
         if ("".equals(value))
             return 0;
-        double latitudeInDegrees;
-        latitudeInDegrees = (Double.parseDouble(value) / 100);
+
+        double latitudeInDegrees = (Double.parseDouble(value) / 100);
         latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
-        return latitudeInDegrees;
+        return latitudeInDegrees ;
     }
 
     public Float getTimeUTC() {

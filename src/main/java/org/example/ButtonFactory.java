@@ -2,7 +2,6 @@ package org.example;
 
 import org.example.newClasses.DBCConnector;
 import org.example.newClasses.FilesHolder;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -31,28 +30,28 @@ public class ButtonFactory {
 //        return jButton;
 //    }
 
-    public static JButton createOpenButton(JFrame frame, FilesHolder holderFirstFile) throws Exception {
+    public static JButton createOpenButton(JFrame frame, FilesHolder holderFirstFile, DBCConnector dbConector) throws Exception {
         JButton jButton = new JButton("Открыть");
 
         jButton.addActionListener(x -> {
-            String DB_USERNAME = "postgres";
-            String DB_PASSWORD = "123";
-            String DB_URL = "jdbc:postgresql://localhost:5432/interfacec2";
+
 
             try {
-                DBCConnector dbConector = new DBCConnector(DB_URL, DB_USERNAME, DB_PASSWORD);
-                //dbConector.addInfoFromRafFile(holderFirstFile.file); todo раскоментировать
+
+                dbConector.addInfoFromRafFile(holderFirstFile.file); //todo раскоментировать
                 System.out.println("все ок");
                 FramePrinter.printNewTableWindow(frame, dbConector, getGGA_table(dbConector), "GGA");
             } catch (Exception e) {
                 try {
                     if (holderFirstFile.file == null) {
-                        FramePrinter.printDownloudWindow(frame, "выбереите файл");
+                        FramePrinter.printDownloudWindow(frame, "выбереите файл", dbConector);
                     } else
-                        FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация");
+                        FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация", dbConector);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
         });
 
@@ -83,11 +82,11 @@ public class ButtonFactory {
         return jButton;
     }
 
-    public static JButton createLoadFileButton(JFrame frame) {
+    public static JButton createLoadFileButton(JFrame frame, DBCConnector dbConector) {
         JButton jButton = new JButton("Выбрать файл");
         jButton.addActionListener(x -> {
             try {
-                FramePrinter.printDownloudWindow(frame, "Файл не выбран");
+                FramePrinter.printDownloudWindow(frame, "Файл не выбран", dbConector);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -102,7 +101,7 @@ public class ButtonFactory {
             try {
                 FramePrinter.printNewTableWindow(frame, connector,
                         getGGA_table(connector), "GGA");
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         });
@@ -138,7 +137,7 @@ public class ButtonFactory {
                         break;
                 }
                 FramePrinter.printNewTableWindow(frame, connection, jTable, item);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         });
@@ -217,7 +216,9 @@ public class ButtonFactory {
 
                 FramePrinter.printNewGraphWindow(frame, connection, dataset, namesOfAxes);
 
-            } catch (Throwable ex) {throw new RuntimeException(ex);}
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         Font font = new Font("Verdana", Font.PLAIN, 18);
@@ -230,13 +231,17 @@ public class ButtonFactory {
 
     private static XYDataset createDataset
             (List<Float> listXAxis, List<Float> listYAxis) throws Throwable {
-        if (listXAxis.size() != listYAxis.size()) throw new Throwable("Данные листы не сопастовимы");
+        if (listXAxis.size() != listYAxis.size()) {
+            throw new Throwable("Данные листы не сопастовимы");
+        }
 
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("");
 
         for (int i = 0; i < listXAxis.size(); i++) {
-            series.add(listXAxis.get(i), listYAxis.get(i));
+            if (listXAxis.get(i) != 0 && listYAxis.get(i) != 0){
+                series.add(listXAxis.get(i), listYAxis.get(i));
+            }
         }
 
         dataset.addSeries(series);
@@ -259,14 +264,55 @@ public class ButtonFactory {
 //        return jButton;
 //    }
 
-    public static JButton createNewGraphbutton(JFrame frame, DBCConnector connector) {
+    public static JButton createNewGraphbutton(JFrame frame, DBCConnector connector) throws Throwable {
         JButton jButton = new JButton("Графики");
 
-        NamesOfAxes namesOfAxes = new NamesOfAxes("скорость", "Время ч.");
-        XYDataset dataset = new DefaultXYDataset();
+        NamesOfAxes namesOfAxes = new NamesOfAxes("latitude", "UTC_date");
+
+        List<Float> listXCord = connector.getLocationInf("UTC_date");
+        List<Float> listYCord = connector.getLocationInf("latitude");
+        XYDataset dataset = createDataset(listXCord, listYCord);
+
+        jButton.addActionListener(x ->
+        {
+            try {
+                FramePrinter.printNewGraphWindow(frame, connector, dataset, namesOfAxes);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return jButton;
+    }
+
+
+    public static JButton createNewSkyPlotButton(JFrame frame, DBCConnector connector) {
+        var jButton = new JButton("Скайплот");
 
         jButton.addActionListener(x -> {
-            FramePrinter.printNewGraphWindow(frame, connector, dataset, namesOfAxes);
+            try {
+                FramePrinter.printNewSkyplotWindow(frame, connector);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return jButton;
+    }
+
+    public static JButton createNewRouteButton(JFrame frame, DBCConnector connector) throws Throwable {
+        var jButton = new JButton("Маршрут");
+
+        List<Float> listXCord = connector.getLocationInf("longitude");
+        List<Float> listYCord = connector.getLocationInf("latitude");
+        XYDataset dataset = createDataset(listXCord, listYCord);
+
+        jButton.addActionListener(x -> {
+            try {
+                FramePrinter.printNewRotePrinter(frame, connector, dataset);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         });
 
         return jButton;

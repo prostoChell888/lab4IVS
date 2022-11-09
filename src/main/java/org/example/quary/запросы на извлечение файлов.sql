@@ -68,3 +68,7 @@ FROM gsv;
 SELECT  elevation, azimuth
 FROM gsv
 WHERE satellite_id = 10;
+
+
+SELECT latitude, longitude
+FROM pos_inform;
