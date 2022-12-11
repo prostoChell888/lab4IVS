@@ -79,8 +79,15 @@ public class DBCConnector {
     private void sendGgaToBd(Standarts standarts, int idOfLocationInformation, int pos_inform_id) throws SQLException {
         if (standarts.gga == null) return;
         /* language=SQL */
-        String sql = "INSERT INTO GGA (location_information_id, pos_inform_id, position_fix_indicator," +
-                " satellites_used, HDOP,  MSL_altitude, units1, geoid_separation1, units2, age_of_diff_corr, diff_ref_station_id)" +
+        String sql = "INSERT INTO GGA (location_information_id," +
+                " pos_inform_id," +
+                " position_fix_indicator," +
+                " satellites_used, HDOP," +
+                "  MSL_altitude, units1," +
+                " geoid_separation1," +
+                " units2," +
+                " age_of_diff_corr," +
+                " diff_ref_station_id)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         PreparedStatement ps = connection.prepareStatement(sql);
@@ -224,10 +231,17 @@ public class DBCConnector {
 
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
-                case "$GPGGA": standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
-                case "$GPGSV": standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
-                case "$GPGSA": standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
-                case "$GPRMC": standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
+                case "$GPGGA":
+                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
+                    break;
+                case "$GPGSV":
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
+                    break;
+                case "$GPGSA":
+                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
+                    break;
+                case "$GPRMC":
+                    standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
                     break;
                 default:
@@ -429,7 +443,7 @@ public class DBCConnector {
                 listOfAzimut.add(cordinates.getInt(1));
                 listOfElevation.add(cordinates.getInt(2));
 
-                series.add(90 - listOfAzimut.get(listOfAzimut.size() - 1) ,
+                series.add(90 - listOfAzimut.get(listOfAzimut.size() - 1),
                         listOfElevation.get(listOfElevation.size() - 1));
             }
             xyDataset.addSeries(series);
@@ -465,7 +479,7 @@ public class DBCConnector {
     }
 
 
-    public  void deletingTableData() throws SQLException {
+    public void deletingTableData() throws SQLException {
         String sql = "TRUNCATE TABLE  pos_inform CASCADE; " +
                 " TRUNCATE TABLE  location_information CASCADE;";
 
@@ -474,4 +488,24 @@ public class DBCConnector {
     }
 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addIfoFromCSVFile(File file) throws Exception {
+        if (file == null) throw new Exception("file == null");
+
+        try (InputStream is = new FileInputStream(file);
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             BufferedReader br = new BufferedReader(isr)) {
+
+            
+
+        } catch (IOException ex) {
+            throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
+        }
+    }
 }
+
+
