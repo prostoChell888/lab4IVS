@@ -3,12 +3,12 @@ package org.example.FormatClases;
 import java.sql.Date;
 
 public class CSVLocalnfo {
-    Float timeUTC;
-    Double latitude;
-    Double longitude;
-    Double speedOverGround;
-    Date date; //распарсить и привести к нужному значению
-    String address;
+    Date date = null; //распарсить и привести к нужному значению
+    Float timeUTC = null;
+    Double latitude  = null ;
+    Double longitude = null;
+    Double speedOverGround = null;
+    String address = null;
 
     public String getAddress() {
         return address;
@@ -25,9 +25,11 @@ public class CSVLocalnfo {
     public void setTimeUTC(String timeUTC) {
         if (timeUTC.equals("")) return;
 
-        Float timeInHours = Float.parseFloat(timeUTC.substring(0, 2)) + 3;
-        timeInHours += Float.parseFloat(timeUTC.substring(2, 4)) / 60;
-        timeInHours += Float.parseFloat(timeUTC.substring(4, 6)) / 360;
+        String[] timeInArr = timeUTC.split(":");
+
+        Float timeInHours = Float.parseFloat(timeInArr[0]) + 3;
+        timeInHours += Float.parseFloat(timeInArr[1]) / 60;
+        timeInHours += Float.parseFloat(timeInArr[2]) / 360;
 
         this.timeUTC = timeInHours;
     }
@@ -59,18 +61,13 @@ public class CSVLocalnfo {
         this.speedOverGround = Double.parseDouble(speedOverGround);
     }
 
-    public java.sql.Date getDate() {
+    public Date getDate() {
         return date;
     }
 
     public void setDate(String date)  {
         if (date.equals("")) return;
-
-        String day = date.substring(0, 2);
-        String moth = date.substring(2, 4);
-        String year = date.substring(4, 6);
-
-        this.date =  java.sql.Date.valueOf("20" + year + "-" + moth + "-" + day);
+        this.date =  Date.valueOf(date);
 
     }
 

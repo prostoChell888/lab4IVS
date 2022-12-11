@@ -1,5 +1,6 @@
 package org.example.newClasses;
 
+import org.example.FormatClases.CSVLocalnfo;
 import org.example.FormatClases.GSV;
 import org.example.FormatClases.PosInform;
 import org.example.FormatClases.Standarts;
@@ -19,6 +20,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.*;
 
@@ -496,14 +498,14 @@ public class DBCConnector {
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
-            String bufString = null;
+
+            String bufString;
             br.readLine();//пропуск первой строки
             while ((bufString = br.readLine()) != null) {
                 logger.info(bufString);
-                String[] arrOfLocationDataInStrings = bufString.split(";");
-
-
-                sendCSVInformToBd(arrOfLocationDataInStrings);
+                String[] arrOfLocationDataInStrings = Arrays.stream(bufString.split("[;\"]")).filter(e -> e.trim().length() > 0).toArray(String[]::new);
+                CSVLocalnfo inform = parseArrToObject(arrOfLocationDataInStrings);
+                sendCSVInformToBd(inform);
 
             }
         } catch (IOException ex) {
@@ -514,8 +516,38 @@ public class DBCConnector {
         }
     }
 
-    private void sendCSVInformToBd(String[] arrOfLocationDataInStrings) {
-        logger.info("===================");
+    private static CSVLocalnfo parseArrToObject(String[] arrOfLocationDataInStrings) {
+        CSVLocalnfo infoOfPos = new CSVLocalnfo();
+
+        String time =  arrOfLocationDataInStrings[0];
+        String[] bufDateTime = time.split(" ");
+        infoOfPos.setDate(bufDateTime[0]);
+        infoOfPos.setTimeUTC(bufDateTime[1]);
+
+        String speed = arrOfLocationDataInStrings[1];
+        String[] bufSpeed = speed.split(" ");
+        infoOfPos.setSpeedOverGround(bufSpeed[0]);
+
+        String cords = arrOfLocationDataInStrings[2];
+        if (!"----".equals(cords)){//TODO возможна ошибка
+            var cordsArr = cords.split(", ");
+            infoOfPos.setLatitude(cordsArr[0]);
+            infoOfPos.setLongitude(cordsArr[1]);
+        }
+
+        String place = arrOfLocationDataInStrings[3];
+        if (!"----".equals(cords)) infoOfPos.setAddress(place);
+
+        return infoOfPos;
+    }
+
+    private void sendCSVInformToBd(CSVLocalnfo info) {
+//        logger.info("===================");
+//        logger.info(String.valueOf(info.getTimeUTC()));
+//        logger.info(String.valueOf(info.getLatitude()));
+//        logger.info(String.valueOf(info.getLongitude()));
+//        logger.info(String.valueOf(info.getSpeedOverGround()));
+//        logger.info(String.valueOf(info.getAddress()));
 
 
 

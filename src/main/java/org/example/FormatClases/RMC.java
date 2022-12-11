@@ -139,4 +139,6 @@ public class RMC {
         //System.out.println("градусы = " + latitudeInDegrees);
         return latitudeInDegrees ;
     }
+
+
 }
