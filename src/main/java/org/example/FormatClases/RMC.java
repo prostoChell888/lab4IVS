@@ -129,4 +129,14 @@ public class RMC {
         if (checksum.equals("")) return;
         this.checksum = Integer.parseInt(checksum);
     }
+
+    private double strToDegree(String value) {
+        if ("".equals(value))
+            return 0;
+
+        double latitudeInDegrees = Math.round((Double.parseDouble(value) / 100));
+        latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
+        //System.out.println("градусы = " + latitudeInDegrees);
+        return latitudeInDegrees ;
+    }
 }

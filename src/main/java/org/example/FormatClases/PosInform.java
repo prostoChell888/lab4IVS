@@ -46,4 +46,14 @@ public class PosInform {
     public void setIndicatorEW(Character indicatorEW) {
         this.indicatorEW = indicatorEW;
     }
+
+    private double strToDegree(String value) {
+        if ("".equals(value))
+            return 0;
+
+        double latitudeInDegrees = Math.round((Double.parseDouble(value) / 100));
+        latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
+        //System.out.println("градусы = " + latitudeInDegrees);
+        return latitudeInDegrees ;
+    }
 }
