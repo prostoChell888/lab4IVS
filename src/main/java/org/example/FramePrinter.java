@@ -15,7 +15,7 @@ import java.util.List;
 
 public class FramePrinter {
 
-
+//в вектк даи 4
     public static void printDownloudWindow(JFrame frame, String fileStatus, DBCConnector dbConector) throws Exception {
         frame.setSize(300, 200);
         frame.setResizable(false);
