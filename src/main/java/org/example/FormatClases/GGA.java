@@ -21,7 +21,7 @@ public class GGA {
         if ("".equals(value))
             return 0;
 
-        double latitudeInDegrees = (Double.parseDouble(value) / 100);
+        double latitudeInDegrees = Math.round((Double.parseDouble(value) / 100));
         latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
         return latitudeInDegrees ;
     }

@@ -8,17 +8,18 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-
+import org.jfree.ui.tabbedui.VerticalLayout;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FramePrinter {
-
-
     public static void printDownloudWindow(JFrame frame, String fileStatus, DBCConnector dbConector) throws Exception {
-        frame.setSize(300, 200);
-        frame.setResizable(false);
+        dbConector.deletingTableData();
+        frame.setSize(500, 500);
+        //frame.setResizable(false);
         frame.getRootPane().setBorder
                 (BorderFactory.createEmptyBorder
                         (20, 10, 20, 10));
@@ -27,33 +28,40 @@ public class FramePrinter {
         container.removeAll();
 
         container.setLayout(new GridLayout
-                (2, 0, 10, 50));
+                (3, 3, 10, 50));
 
-        JLabel jl = new JLabel("Выбирите файл");
-        var holderFirstFile = new FilesHolder();
+        JLabel jl = new JLabel("Выбирите первый файл");
+        List<File> files = new ArrayList<>();
         JLabel status = new JLabel(fileStatus);
-        JButton buttonChooseFile = ButtonFactory.createButtonChooseFile(status, holderFirstFile);
+        JButton buttonChooseFile = ButtonFactory.createButtonChooseFile(status, files);
 
-        JButton buttonOpen = ButtonFactory.createOpenButton(frame, holderFirstFile, dbConector);
+        //////
+        JLabel jl2 = new JLabel("Выбирите второй файл");
+        JLabel status2 = new JLabel(fileStatus);
+        JButton buttonChooseFile2 = ButtonFactory.createButtonChooseFile(status2, files);
+        //////
+
+
+
+        JButton buttonOpen = ButtonFactory.createOpenButton(frame, files, dbConector);
 
         container.add(jl);
         container.add(buttonChooseFile);
         container.add(status);
+
+        container.add(jl2);
+        container.add(buttonChooseFile2);
+        container.add(status2);
+
         container.add(buttonOpen);
 
         frame.revalidate();
         frame.repaint();
     }
 
-    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice) throws Throwable {
-
-        frame.setSize(1000, 800);
-        frame.setResizable(true);
-
-        Container container = frame.getContentPane();
-        container.removeAll();
-        container.setLayout(new BorderLayout());
-
+    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice)
+            throws Throwable {
+        Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
         container.add(jToolBar, BorderLayout.NORTH);
@@ -62,14 +70,9 @@ public class FramePrinter {
         jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+        jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
 
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(0, 1, 5, 12));
-
-
-        jPanel.add(new JLabel("<html>Выберите<br/>формат</html>"));
-        jPanel.add(ButtonFactory.createFormatChoserButton(frame, connector, defaultChoice));
-
+        JPanel jPanel = createSetingsPanel(frame, connector, defaultChoice);
 
         container.add(jPanel, BorderLayout.WEST);
 
@@ -79,65 +82,42 @@ public class FramePrinter {
 
         frame.revalidate();
         frame.repaint();
+    }
 
+    private static JPanel createSetingsPanel(JFrame frame, DBCConnector connector, String defaultChoice) {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(0, 1, 5, 12));
+
+        JPanel format = new JPanel();
+        format.setLayout(new VerticalLayout());
+
+        format.add(new JLabel("<html>Выберите<br/>формат</html>"));
+        format.add(ButtonFactory.createFormatChoserButton(frame, connector, defaultChoice));
+
+        jPanel.add(format);
+        format.setLayout(new VerticalLayout());
+
+        JPanel from = new JPanel();
+        from.add(new JLabel("от"));
+        from.add(new JTextField(10));
+        format.add(new JLabel("<html>Выберите<br/>время</html>"));
+        format.add(from);
+        JPanel till = new JPanel();
+        till.add(new JLabel("до"));
+        till.add(new JTextField(10));
+        format.add(till);
+
+        format.add(new JButton("Обновить"));
+        return jPanel;
     }
 
 
-//    public static void printTableWindow(JFrame frame, List<Location> listWithCoordinates) throws Exception {
-//
-//        if (listWithCoordinates == null) {
-//            throw new Exception("Невозможно считать содерижиое файла");
-//        }
-//        Container container = frame.getContentPane();
-//        container.removeAll();
-//        container.setLayout(new BorderLayout());
-//
-//        frame.setResizable(true);
-//        frame.setSize(1300, 700);
-//
-//        JTable table  = new JTable(); // = getjTable(listWithCoordinates);
-//        JScrollPane scrollPane = new JScrollPane(table);
-//        container.add(scrollPane, BorderLayout.CENTER);
-//
-//
-//        List<Double> listXAxis = new ArrayList<>();
-//        List<Double> listYAxis = new ArrayList<>();
-//
-//        StringBuilder nameOfXAxis = new StringBuilder();
-//        StringBuilder nameOfYAxis = new StringBuilder();
-//        JComboBox boxAxisX = ButtonFactory.createComboBoxChooseAxis(listXAxis, listWithCoordinates, nameOfXAxis);
-//        JComboBox boxAxisY = ButtonFactory.createComboBoxChooseAxis(listYAxis, listWithCoordinates, nameOfYAxis);
-//
-//        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
-//
-//        JButton graphButton = ButtonFactory.createGraphButton(frame, listXAxis, listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
-//
-//
-//
-//        JPanel grid = new JPanel(new GridLayout(6, 1, 0, 5));
-//
-//        grid.add(loadFileButton);
-//        grid.add(new Label("Ось X"));
-//        grid.add(boxAxisX);
-//        grid.add(new Label("Ось Y"));
-//        grid.add(boxAxisY);
-//        grid.add(graphButton);
-//
-//
-//        container.add(grid, BorderLayout.WEST);
-//        frame.revalidate();
-//        frame.repaint();
-//
-//    }
 
     public static void printNewGraphWindow(JFrame frame, DBCConnector connector,
                                            XYDataset dataset, NamesOfAxes namesOfAxes) throws Throwable {
-        frame.setSize(1000, 800);
-        frame.setResizable(true);
 
-        Container container = frame.getContentPane();
-        container.removeAll();
-        container.setLayout(new BorderLayout());
+
+        Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
         container.add(jToolBar, BorderLayout.NORTH);
@@ -146,6 +126,7 @@ public class FramePrinter {
         jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(new JButton("Графики"));
+        jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(0, 1, 5, 12));
@@ -168,42 +149,18 @@ public class FramePrinter {
         frame.repaint();
     }
 
+    private static Container setSize(JFrame frame) {
+        frame.setSize(1000, 800);
+        frame.setResizable(true);
 
-//    public static void printGraphWindow
-//            (JFrame frame, List<Double> listXAxis,
-//             List<Double> listYAxis, StringBuilder nameOfXAxis,
-//             StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
-//        Container container = frame.getContentPane();
-//        container.removeAll();
-//        container.setLayout(new BorderLayout());
-//
-//        XYDataset dataset = createDatasetForSpeedWithTime(listXAxis, listYAxis);
-//
-//        JFreeChart chart = ChartFactory.createScatterPlot(
-//                "График зависимости",
-//                nameOfXAxis.toString(),//x
-//                nameOfYAxis.toString(),//y
-//                dataset);
-//        XYPlot plot = (XYPlot) chart.getPlot();
-//        plot.setBackgroundPaint(new Color(196, 217, 255));
-//
-//        ChartPanel panel = new ChartPanel(chart);
-//        container.add(panel, BorderLayout.CENTER);
-//
-//        JPanel grid = new JPanel(new GridLayout(2, 1, 0, 5));
-//
-//        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
-//        JButton tableBitton = ButtonFactory.createTable(frame, listWithCoordinates);
-//
-//        grid.add(loadFileButton);
-//        grid.add(tableBitton);
-//        container.add(grid, BorderLayout.WEST);
-//
-//
-//        frame.revalidate();
-//        frame.repaint();
-//
-//    }
+        Container container = frame.getContentPane();
+        container.removeAll();
+        container.setLayout(new BorderLayout());
+        return container;
+    }
+
+
+
 
     private static XYDataset createDatasetForSpeedWithTime
             (List<Double> listXAxis, List<Double> listYAxis) {
@@ -220,12 +177,7 @@ public class FramePrinter {
     }
 
     public static void printNewSkyplotWindow(JFrame frame, DBCConnector connector) throws Throwable {
-        frame.setSize(1000, 800);
-        frame.setResizable(true);
-
-        Container container = frame.getContentPane();
-        container.removeAll();
-        container.setLayout(new BorderLayout());
+        Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
         container.add(jToolBar, BorderLayout.NORTH);
@@ -234,6 +186,7 @@ public class FramePrinter {
         jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
         jToolBar.add(new JButton("Скайплот"));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+        jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
 
         JFreeChart chart = connector.getSputniksPosighions();
 
@@ -245,12 +198,7 @@ public class FramePrinter {
     }
 
     public static void printNewRotePrinter(JFrame frame, DBCConnector connector, XYDataset dataset) throws Throwable {
-        frame.setSize(1000, 800);
-        frame.setResizable(true);
-
-        Container container = frame.getContentPane();
-        container.removeAll();
-        container.setLayout(new BorderLayout());
+        Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
         container.add(jToolBar, BorderLayout.NORTH);
@@ -259,6 +207,7 @@ public class FramePrinter {
         jToolBar.add(new JButton("Маршрут"));
         jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+        jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
 
 
         JFreeChart chart = ChartFactory.createScatterPlot(
@@ -269,8 +218,6 @@ public class FramePrinter {
 
         ChartPanel panel = new ChartPanel(chart);
         container.add(panel, BorderLayout.CENTER);
-
-        //container.add(new ChartPanel(chart), BorderLayout.CENTER);
 
         frame.revalidate();
         frame.repaint();

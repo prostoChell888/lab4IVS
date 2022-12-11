@@ -8,6 +8,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
@@ -16,37 +17,23 @@ import static java.awt.Component.LEFT_ALIGNMENT;
 
 public class ButtonFactory {
 
-//    public static JButton createTable(JFrame frame, List<Location> listWithCoordinates) {
-//        JButton jButton = new JButton("Таблица");
-//
-//        jButton.addActionListener(x -> {
-//            try {
-//                FramePrinter.printTableWindow(frame, listWithCoordinates);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//
-//        return jButton;
-//    }
 
-    public static JButton createOpenButton(JFrame frame, FilesHolder holderFirstFile, DBCConnector dbConector) throws Exception {
+    public static JButton createOpenButton(JFrame frame, List<File> files, DBCConnector dbConnector) {
         JButton jButton = new JButton("Открыть");
 
         jButton.addActionListener(x -> {
-
-
             try {
-
-                dbConector.addInfoFromRafFile(holderFirstFile.file); //todo раскоментировать
-                System.out.println("все ок");
-                FramePrinter.printNewTableWindow(frame, dbConector, getGGA_table(dbConector), "GGA");
+                for (int deviceNumber = 0; deviceNumber <files.size(); deviceNumber++) {
+                    dbConnector.addInfoFromRafFile(files.get(deviceNumber), deviceNumber);
+                    System.out.println("все ок");
+                    FramePrinter.printNewTableWindow(frame, dbConnector, getGGA_table(dbConnector), "GGA");
+                }
             } catch (Exception e) {
                 try {
-                    if (holderFirstFile.file == null) {
-                        FramePrinter.printDownloudWindow(frame, "выбереите файл", dbConector);
+                    if (files.get(0) == null) {
+                        FramePrinter.printDownloudWindow(frame, "выбереите файл", dbConnector);
                     } else
-                        FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация", dbConector);
+                        FramePrinter.printDownloudWindow(frame, "в файле отсутствует информация", dbConnector);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -59,7 +46,7 @@ public class ButtonFactory {
     }
 
 
-    public static JButton createButtonChooseFile(JLabel jl, FilesHolder files) {
+    public static JButton createButtonChooseFile(JLabel jl, List<File> files) {
         JButton jButton = new JButton("Выбрать");
 
         jButton.addActionListener(x -> {
@@ -70,8 +57,8 @@ public class ButtonFactory {
                 //если выбор был сделан
                 if (dialoVal == JFileChooser.APPROVE_OPTION) {
                     try {
-                        files.file = jC.getSelectedFile();
-                        jl.setText(files.file.getName());
+                        files.add(jC.getSelectedFile());
+                        jl.setText(files.get(files.size() - 1).getName());
                     } catch (Exception e) {
                         jl.setText(e.getMessage());
                     }
@@ -149,7 +136,7 @@ public class ButtonFactory {
     }
 
 
-    private static JTable getGGA_table(DBCConnector connector) throws SQLException {
+    public static JTable getGGA_table(DBCConnector connector) throws SQLException {
         String[] header = {"Время ч.", "Дата", "Широта гр.", "N/S Indicator", "Долгота", "E/W Indicator", "фиксация",
                 "Используемы\n спутники", "Горизонтальное\n разбавление\n точности", "Units"
         };
@@ -239,7 +226,7 @@ public class ButtonFactory {
         XYSeries series = new XYSeries("");
 
         for (int i = 0; i < listXAxis.size(); i++) {
-            if (listXAxis.get(i) != 0 && listYAxis.get(i) != 0){
+            if (listXAxis.get(i) != 0 && listYAxis.get(i) != 0) {
                 series.add(listXAxis.get(i), listYAxis.get(i));
             }
         }
@@ -248,21 +235,6 @@ public class ButtonFactory {
         return dataset;
     }
 
-//    public static JButton createGraphButton
-//            (JFrame frame, List<Double> listXAxis,
-//             List<Double> listYAxis, StringBuilder nameOfXAxis,
-//             StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
-//
-//        JButton jButton = new JButton("Графики");
-//
-//        ActionListener actionListener = e -> {
-//            FramePrinter.printGraphWindow(frame, listXAxis,
-//                    listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
-//        };
-//        jButton.addActionListener(actionListener);
-//
-//        return jButton;
-//    }
 
     public static JButton createNewGraphbutton(JFrame frame, DBCConnector connector) throws Throwable {
         JButton jButton = new JButton("Графики");

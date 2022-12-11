@@ -8,10 +8,10 @@ public class Location {
     String date = "";// XXXXXX(6 цифр) XX(Day)XX(Month)XX(Year)!!!!
     String time = "";//XXXXXX(6 цифр) XX(Часы)XX(Минуты)XX (Секунды)!!!!
 
-    String latitude = ""; // Значение широты (разделить на 100)!!!!
+    String latitude = ""; //
     char n_s = ' ';//N: Север, S: Юг
 
-    String longitude = "";//Значение долготы (разделить на 100)!!!!
+    String longitude = "";//
     char e_v = ' ';// E: Восток, W: Запад
 
     String speed = ""; //Значение скорости (км/ч)!!!!

@@ -4,7 +4,6 @@ import org.example.FormatClases.GSV;
 import org.example.FormatClases.PosInform;
 import org.example.FormatClases.Standarts;
 import org.example.notUse.MyFormater;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PolarPlot;
@@ -14,15 +13,12 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
-
-import static org.example.Main.createPolarChart;
 
 public class DBCConnector {
     Logger logger;
@@ -43,7 +39,7 @@ public class DBCConnector {
     }
 
 
-    public void addInfoFromRafFile(File file) throws Exception {
+    public void addInfoFromRafFile(File file, int deviceNumber) throws Exception {
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
@@ -53,7 +49,7 @@ public class DBCConnector {
             while (getFormatsFromBuffer(br, standarts)) {
 
                 isEmpty = checkAvailabilityOfInfo(standarts);
-                int idOfLocationInformation = sendLocationInformToBd(standarts);
+                int idOfLocationInformation = sendLocationInformToBd(standarts, deviceNumber);
                 int idOfGSA = sendGSAToBd(standarts, idOfLocationInformation);
                 sendGSVToBD(standarts, idOfLocationInformation, idOfGSA);
                 int pos_inform_id = sendPosInform(standarts);
@@ -181,7 +177,7 @@ public class DBCConnector {
         return result.getInt(1);
     }
 
-    private int sendLocationInformToBd(Standarts standarts) throws SQLException {
+    private int sendLocationInformToBd(Standarts standarts, int deviceNumber) throws SQLException {
         Float time;
         if (standarts.rmc != null) time = standarts.rmc.getTimeUTC();
         else if (standarts.gga != null) time = standarts.gga.getTimeUTC();
@@ -192,7 +188,7 @@ public class DBCConnector {
                 "VALUES (?, ?, ?) RETURNING location_information_id;";
         PreparedStatement ps = connection.prepareStatement(sql);
 
-        ps.setInt(1, 1);
+        ps.setInt(1, deviceNumber);//todo сдесь определить id устройства
         ps.setFloat(2, time);
         ps.setDate(3, standarts.rmc.getDate());
         ResultSet result = ps.executeQuery();
@@ -224,10 +220,17 @@ public class DBCConnector {
 
             String[] arrOfLocationDataInStrings = bufString.substring(startOfStandartStr).split("[*,]");
             switch (arrOfLocationDataInStrings[0]) {
-                case "$GPGGA": standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);break;
-                case "$GPGSV": standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));break;
-                case "$GPGSA": standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);break;
-                case "$GPRMC": standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
+                case "$GPGGA":
+                    standarts.gga = ParserCordFormats.GGA_Parser(arrOfLocationDataInStrings);
+                    break;
+                case "$GPGSV":
+                    standarts.gsv.addAll(ParserCordFormats.GSV_Parser(arrOfLocationDataInStrings));
+                    break;
+                case "$GPGSA":
+                    standarts.gsa = ParserCordFormats.GSA_Parser(arrOfLocationDataInStrings);
+                    break;
+                case "$GPRMC":
+                    standarts.rmc = ParserCordFormats.RMC_Parser(arrOfLocationDataInStrings);
                     f = false;
                     break;
                 default:
@@ -429,7 +432,7 @@ public class DBCConnector {
                 listOfAzimut.add(cordinates.getInt(1));
                 listOfElevation.add(cordinates.getInt(2));
 
-                series.add(90 - listOfAzimut.get(listOfAzimut.size() - 1) ,
+                series.add(90 - listOfAzimut.get(listOfAzimut.size() - 1),
                         listOfElevation.get(listOfElevation.size() - 1));
             }
             xyDataset.addSeries(series);
@@ -465,12 +468,24 @@ public class DBCConnector {
     }
 
 
-    public  void deletingTableData() throws SQLException {
+    public void deletingTableData() throws SQLException {
         String sql = "TRUNCATE TABLE  pos_inform CASCADE; " +
                 " TRUNCATE TABLE  location_information CASCADE;";
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(sql);
+    }
+
+    public boolean isAvailabilityOfData() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT COUNT(device_id) " +
+                "FROM location_information";
+
+        Statement statement = connection.createStatement();
+        ResultSet result = statement.executeQuery(sql);
+        result.next();
+        int count = result.getInt(1);
+        return count != 0;
     }
 
 
