@@ -54,8 +54,7 @@ public class App extends JFrame {
 
         });
         if (dbConector.isAvailabilityOfData()){
-            FramePrinter.printNewTableWindow
-                    (this, dbConector, ButtonFactory.getGGA_table(dbConector), "GGA");
+            FramePrinter.printNewTableWindow(this, dbConector);
         }
         else {
             FramePrinter.printDownloudWindow(this, "файл не выбран", dbConector);

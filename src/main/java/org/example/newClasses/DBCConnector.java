@@ -17,6 +17,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.*;
 
@@ -323,8 +324,8 @@ public class DBCConnector {
         return set;
     }
 
-    public List<List<String>> getGGA_inf() throws SQLException {
-        ResultSet set = getResultSetOfGGAQary();
+    public List<List<String>> getGGA_inf(Integer device_id) throws SQLException {
+        ResultSet set = getResultSetOfGGAQary(device_id);
 
         List<List<String>> table = new ArrayList<>();
         while (set.next()) {
@@ -346,7 +347,7 @@ public class DBCConnector {
         return table;
     }
 
-    private ResultSet getResultSetOfGGAQary() throws SQLException {
+    private ResultSet getResultSetOfGGAQary(Integer device_id) throws SQLException {
         /* language=SQL */
         String sql = "SELECT UTC_date, " + " date_of_locate, " + " latitude, " + " N_S_indicator, " + " longitude, " +
                 "       E_W_Indicator, " +
@@ -357,7 +358,8 @@ public class DBCConnector {
                 "FROM gga " +
                 "         JOIN location_information USING (location_information_id) " +
                 "         JOIN pos_inform USING (pos_inform_id) " +
-                "ORDER BY  UTC_date;";
+                "WHERE location_information.device_id = " + device_id +
+                " ORDER BY  UTC_date;";
 
         Statement st = connection.createStatement();
         ResultSet set = st.executeQuery(sql);
@@ -486,6 +488,30 @@ public class DBCConnector {
         result.next();
         int count = result.getInt(1);
         return count != 0;
+    }
+
+
+    public Collection<Double> getAVGLatAndLong(Integer numOFDevice) throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT CAST (SUM(latitude)  AS float) / COUNT(latitude), " +
+                " CAST (SUM(longitude)  AS float) / COUNT(longitude), " +
+                " CAST (SUM(msl_altitude)  AS float) / COUNT(msl_altitude) " +
+                "FROM gga " +
+                "         JOIN location_information USING (location_information_id) " +
+                "         JOIN pos_inform USING (pos_inform_id) " +
+                "WHERE location_information.device_id = " + numOFDevice;
+
+        Statement statement = connection.createStatement();
+        ResultSet result = statement.executeQuery(sql);
+
+        List<Double> ans = new ArrayList<>();
+
+        result.next();
+        ans.add(result.getDouble(1));
+        ans.add(result.getDouble(2));
+        ans.add(result.getDouble(3));
+
+        return ans;
     }
 
 

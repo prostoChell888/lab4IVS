@@ -23,11 +23,12 @@ public class ButtonFactory {
 
         jButton.addActionListener(x -> {
             try {
-                for (int deviceNumber = 0; deviceNumber <files.size(); deviceNumber++) {
+                for (int deviceNumber = 0; deviceNumber < files.size(); deviceNumber++) {
                     dbConnector.addInfoFromRafFile(files.get(deviceNumber), deviceNumber);
-                    System.out.println("все ок");
-                    FramePrinter.printNewTableWindow(frame, dbConnector, getGGA_table(dbConnector), "GGA");
+                    System.out.println("все ок у" + deviceNumber + " файла");
                 }
+                    FramePrinter.printNewTableWindow(frame, dbConnector);
+
             } catch (Exception e) {
                 try {
                     if (files.get(0) == null) {
@@ -86,8 +87,7 @@ public class ButtonFactory {
         JButton jButton = new JButton("Таблицы");
         jButton.addActionListener(x -> {
             try {
-                FramePrinter.printNewTableWindow(frame, connector,
-                        getGGA_table(connector), "GGA");
+                FramePrinter.printNewTableWindow(frame, connector);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -107,23 +107,26 @@ public class ButtonFactory {
             JComboBox box = (JComboBox) al.getSource();
             String item = (String) box.getSelectedItem();
 
-            JTable jTable = new JTable();
+            JTable jTable1 = new JTable();
+            JTable jTable2 = new JTable();
+
             try {
                 switch (Objects.requireNonNull(item)) {
                     case "GGA":
-                        jTable = getGGA_table(connection);
+                        jTable1 = getGGA_table(connection, 0);
+                        jTable2 = getGGA_table(connection, 1);
                         break;
                     case "RMC":
-                        jTable = getRMC_table(connection);
+                        jTable1 = getRMC_table(connection);
                         break;
                     case "GSA":
-                        jTable = getGSA_table(connection);
+                        jTable1 = getGSA_table(connection);
                         break;
                     case "GSV":
-                        jTable = getGSV_table(connection);
+                        jTable1 = getGSV_table(connection);
                         break;
                 }
-                FramePrinter.printNewTableWindow(frame, connection, jTable, item);
+                FramePrinter.printNewTableWindow(frame, connection, jTable1, jTable2, item);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -136,11 +139,11 @@ public class ButtonFactory {
     }
 
 
-    public static JTable getGGA_table(DBCConnector connector) throws SQLException {
-        String[] header = {"Время ч.", "Дата", "Широта гр.", "N/S Indicator", "Долгота", "E/W Indicator", "фиксация",
+    public static JTable getGGA_table(DBCConnector connector, Integer device_id) throws SQLException {
+        String[] header = {"Время ч.", "Дата", "Широта гр.", "N/S Indicator", "Долгота гр.", "E/W Indicator", "фиксация",
                 "Используемы\n спутники", "Горизонтальное\n разбавление\n точности", "Units"
         };
-        List<List<String>> data = connector.getGGA_inf();
+        List<List<String>> data = connector.getGGA_inf(device_id);
 
         return getJTable(data, header);
     }
@@ -289,5 +292,19 @@ public class ButtonFactory {
 
         return jButton;
 
+    }
+
+    public static JButton createNewSKOButton(JFrame frame, DBCConnector connector) {
+        var jButton = new JButton("СКО");
+
+        jButton.addActionListener(x -> {
+            try {
+                FramePrinter.printNewSKOWindow(frame, connector);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+//todo
+        return jButton;
     }
 }

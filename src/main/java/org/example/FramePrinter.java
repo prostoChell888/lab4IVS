@@ -1,7 +1,6 @@
 package org.example;
 
 import org.example.newClasses.DBCConnector;
-import org.example.newClasses.FilesHolder;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -12,6 +11,7 @@ import org.jfree.ui.tabbedui.VerticalLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +59,13 @@ public class FramePrinter {
         frame.repaint();
     }
 
-    public static void printNewTableWindow(JFrame frame, DBCConnector connector, JTable jTable, String defaultChoice)
-            throws Throwable {
+    public static void printNewTableWindow(JFrame frame, DBCConnector dbConector) throws Throwable {
+        printNewTableWindow(frame, dbConector, ButtonFactory.getGGA_table(dbConector,
+                0), ButtonFactory.getGGA_table(dbConector, 1),"GGA");
+    }
+
+    public static void printNewTableWindow(JFrame frame, DBCConnector connector,JTable jTable1, JTable jTable2,
+                                           String defaultChoice) throws Throwable {
         Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
@@ -71,20 +76,32 @@ public class FramePrinter {
         jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
         jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewSKOButton(frame, connector));
 
         JPanel jPanel = createSetingsPanel(frame, connector, defaultChoice);
 
         container.add(jPanel, BorderLayout.WEST);
 
-        JScrollPane scrollPane = new JScrollPane(jTable);
+        JScrollPane scrollPane = new JScrollPane(jTable1);
+        JScrollPane scrollPane2 = new JScrollPane(jTable2);
 
-        container.add(scrollPane, BorderLayout.CENTER);
+        JPanel jPanel2 = new JPanel();
+        jPanel2.setLayout(new GridLayout
+                (1, 2, 2, 2));
+
+        jPanel2.add(scrollPane);
+        jPanel2.add(scrollPane2);
+
+
+        container.add(jPanel2, BorderLayout.CENTER);
+
 
         frame.revalidate();
         frame.repaint();
     }
 
-    private static JPanel createSetingsPanel(JFrame frame, DBCConnector connector, String defaultChoice) {
+    private static JPanel createSetingsPanel(JFrame frame, DBCConnector connector,
+                                             String defaultChoice) {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(0, 1, 5, 12));
 
@@ -106,8 +123,8 @@ public class FramePrinter {
         till.add(new JLabel("до"));
         till.add(new JTextField(10));
         format.add(till);
-
         format.add(new JButton("Обновить"));
+        
         return jPanel;
     }
 
@@ -115,8 +132,6 @@ public class FramePrinter {
 
     public static void printNewGraphWindow(JFrame frame, DBCConnector connector,
                                            XYDataset dataset, NamesOfAxes namesOfAxes) throws Throwable {
-
-
         Container container = setSize(frame);
 
         JToolBar jToolBar = new JToolBar("Запросы");
@@ -144,7 +159,6 @@ public class FramePrinter {
         ChartPanel panel = new ChartPanel(chart);
         container.add(panel, BorderLayout.CENTER);
 
-
         frame.revalidate();
         frame.repaint();
     }
@@ -158,10 +172,8 @@ public class FramePrinter {
         container.setLayout(new BorderLayout());
         return container;
     }
-
-
-
-
+    
+    
     private static XYDataset createDatasetForSpeedWithTime
             (List<Double> listXAxis, List<Double> listYAxis) {
         XYSeriesCollection dataset = new XYSeriesCollection();
@@ -194,7 +206,6 @@ public class FramePrinter {
 
         frame.revalidate();
         frame.repaint();
-
     }
 
     public static void printNewRotePrinter(JFrame frame, DBCConnector connector, XYDataset dataset) throws Throwable {
@@ -208,8 +219,7 @@ public class FramePrinter {
         jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
         jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
-
-
+        
         JFreeChart chart = ChartFactory.createScatterPlot(
                 "Маршрут",
                 "latitude",//x
@@ -221,5 +231,62 @@ public class FramePrinter {
 
         frame.revalidate();
         frame.repaint();
+    }
+
+    public static void printNewSKOWindow(JFrame frame, DBCConnector connector) throws Throwable {
+
+        Container container = setSize(frame);
+
+        JToolBar jToolBar = new JToolBar("Запросы");
+        container.add(jToolBar, BorderLayout.NORTH);
+
+        jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
+        jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
+        jToolBar.add(ButtonFactory.createLoadFileButton(frame, connector));
+        jToolBar.add(new JButton("CKO"));
+
+        List<Double> avgPNSCord1 = getAvgPNSCord(connector, 0);
+        List<Double> avgPNSCord2 = getAvgPNSCord(connector, 1);
+        List<Double> avgPNSCordDif = getDifOfMatr(avgPNSCord1, avgPNSCord2);
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(1, 3, 5, 12));
+
+        jPanel.add(new JLabel("<html>Средние значения из 1 файла <br/>" + getParametrs(avgPNSCord1)));
+        jPanel.add(new JLabel("<html>Средние значения из 1 файла <br/>" + getParametrs(avgPNSCord2)));
+        jPanel.add(new JLabel("<html>Разница средних значений <br/>" + getParametrs(avgPNSCordDif)));
+
+        container.add(jPanel, BorderLayout.CENTER);
+
+        frame.revalidate();
+        frame.repaint();
+    }
+
+
+    private static String getParametrs(List<Double> list) {
+        return "Высота: " + list.get(0) + " градусов<br/>"+
+                "Широта: " + list.get(1) + " градусов<br/>" +
+                "Долгота: " + list.get(2) + " метров";
+    }
+
+    private static List<Double> getDifOfMatr(List<Double> avgPNSCord1, List<Double> avgPNSCord2) {
+        List<Double> avgPNSCordDif = new ArrayList<>();
+
+        for (int i = 0; i < avgPNSCord1.size(); i++) {
+            Double dif = avgPNSCord2.get(i) - avgPNSCord1.get(i);
+            avgPNSCordDif.add(dif);
+        }
+
+        return avgPNSCordDif;
+    }
+
+    private static List<Double> getAvgPNSCord(DBCConnector connector, Integer numOFDevice)
+            throws SQLException {
+        List<Double> avgPNSCord = new ArrayList<>();
+        avgPNSCord.addAll(connector.getAVGLatAndLong(numOFDevice));
+
+
+        return avgPNSCord;
     }
 }
