@@ -46,7 +46,7 @@ public class RMC {
         return latitude;
     }
 
-    //TODO сделать корректынй перевод в градусы
+
     public void setLatitude(String latitude) {
         if (latitude.equals("")) return;
         this.latitude = Double.parseDouble(latitude);

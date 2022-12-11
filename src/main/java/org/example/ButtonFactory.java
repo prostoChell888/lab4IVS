@@ -34,11 +34,10 @@ public class ButtonFactory {
         JButton jButton = new JButton("Открыть");
 
         jButton.addActionListener(x -> {
-
-
             try {
 
                 //dbConector.addInfoFromRafFile(holderFirstFile.file); //todo раскоментировать
+                dbConector.addIfoFromCSVFile(holderFirstFile.file);
                 System.out.println("все ок");
                 FramePrinter.printNewTableWindow(frame, dbConector, getGGA_table(dbConector), "GGA");
             } catch (Exception e) {

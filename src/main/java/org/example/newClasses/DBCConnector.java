@@ -490,21 +490,38 @@ public class DBCConnector {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void addIfoFromCSVFile(File file) throws Exception {
+    public void addIfoFromCSVFile(File file) throws Exception {
         if (file == null) throw new Exception("file == null");
 
         try (InputStream is = new FileInputStream(file);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
+            String bufString = null;
+            br.readLine();//пропуск первой строки
+            while ((bufString = br.readLine()) != null) {
+                logger.info(bufString);
+                String[] arrOfLocationDataInStrings = bufString.split(";");
 
-            
 
+                sendCSVInformToBd(arrOfLocationDataInStrings);
+
+            }
         } catch (IOException ex) {
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
         }
+    }
+
+    private void sendCSVInformToBd(String[] arrOfLocationDataInStrings) {
+        logger.info("===================");
+
+
+
+
+
+
     }
 }
 

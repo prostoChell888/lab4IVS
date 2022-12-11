@@ -23,6 +23,7 @@ CREATE TABLE pos_inform
     N_S_indicator CHAR,
     longitude     float,
     E_W_Indicator CHAR,
+    address       varchar,
 
     CONSTRAINT PK_pos_inform_pos_inform_id PRIMARY KEY (pos_inform_id)
 );
