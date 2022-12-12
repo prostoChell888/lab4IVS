@@ -617,7 +617,7 @@ public class DBCConnector {
                 + " speed_over_ground, "
                 + " latitude, "
                 + " longitude, " +
-                "   address " +
+                "   COALESCE(address, 'unknown')" +
                 "FROM RMC " +
                 "  JOIN location_information USING (location_information_id) " +
                 "JOIN pos_inform USING(pos_inform_id) " +
