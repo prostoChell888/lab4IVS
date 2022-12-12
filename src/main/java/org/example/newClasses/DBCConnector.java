@@ -377,39 +377,10 @@ public class DBCConnector {
         return set;
     }
 
-    public List<List<String>> getGSV_inf() throws SQLException {
-        ResultSet set = getResultSetGSVinf();
-
-        List<List<String>> table = new ArrayList<>();
-        while (set.next()) {
-            var str = new ArrayList<String>();
-            str.add(Float.toString(set.getFloat("UTC_date")));
-            str.add(set.getDate("date_of_locate").toString());
-            str.add(Integer.toString(set.getInt("satellite_id")));
-            str.add(Integer.toString(set.getInt("elevation")));
-            str.add(Integer.toString(set.getInt("azimuth")));
-            str.add(Integer.toString(set.getInt("snr_c_no")));
-
-            table.add(str);
-        }
-
-        return table;
-    }
-
-    private ResultSet getResultSetGSVinf() throws SQLException {
-        /* language=SQL */
-        String sql = "SELECT UTC_date, " + " date_of_locate, " + " satellite_id, " + " azimuth, " + " elevation, " +
-                "       snr_c_no " + "FROM gsv " + "  JOIN location_information USING (location_information_id) " +
-                "ORDER BY  UTC_date;";
-
-        Statement st = connection.createStatement();
-        ResultSet set = st.executeQuery(sql);
-        return set;
-    }
 
     public List<Float> getLocationInf(String parameter) throws SQLException {
         // language=SQL
-        String sql = "SELECT " + parameter + " FROM  gga " +
+        String sql = "SELECT " + parameter + " FROM  RMC " +
                 "JOIN location_information USING (location_information_id) " +
                 "         JOIN pos_inform USING (pos_inform_id) " +
                 "ORDER BY UTC_date";
@@ -503,10 +474,10 @@ public class DBCConnector {
             br.readLine();//пропуск первой строки
             while ((bufString = br.readLine()) != null) {
                 logger.info(bufString);
-                String[] arrOfLocationDataInStrings = Arrays.stream(bufString.split("[;\"]")).filter(e -> e.trim().length() > 0).toArray(String[]::new);
+                String[] arrOfLocationDataInStrings = Arrays.stream(bufString.split("[;\"]")).
+                        filter(e -> e.trim().length() > 0).toArray(String[]::new);
                 CSVLocalnfo inform = parseArrToObject(arrOfLocationDataInStrings);
                 sendCSVInformToBd(inform);
-
             }
         } catch (IOException ex) {
             throw new Exception("Ошибка преобразования файла\n" + ex.getMessage());
@@ -519,7 +490,7 @@ public class DBCConnector {
     private static CSVLocalnfo parseArrToObject(String[] arrOfLocationDataInStrings) {
         CSVLocalnfo infoOfPos = new CSVLocalnfo();
 
-        String time =  arrOfLocationDataInStrings[0];
+        String time = arrOfLocationDataInStrings[0];
         String[] bufDateTime = time.split(" ");
         infoOfPos.setDate(bufDateTime[0]);
         infoOfPos.setTimeUTC(bufDateTime[1]);
@@ -529,7 +500,7 @@ public class DBCConnector {
         infoOfPos.setSpeedOverGround(bufSpeed[0]);
 
         String cords = arrOfLocationDataInStrings[2];
-        if (!"----".equals(cords)){//TODO возможна ошибка
+        if (!"----".equals(cords)) {//TODO возможна ошибка
             var cordsArr = cords.split(", ");
             infoOfPos.setLatitude(cordsArr[0]);
             infoOfPos.setLongitude(cordsArr[1]);
@@ -541,19 +512,120 @@ public class DBCConnector {
         return infoOfPos;
     }
 
-    private void sendCSVInformToBd(CSVLocalnfo info) {
-//        logger.info("===================");
-//        logger.info(String.valueOf(info.getTimeUTC()));
-//        logger.info(String.valueOf(info.getLatitude()));
-//        logger.info(String.valueOf(info.getLongitude()));
-//        logger.info(String.valueOf(info.getSpeedOverGround()));
-//        logger.info(String.valueOf(info.getAddress()));
+    private void sendCSVInformToBd(CSVLocalnfo info) throws SQLException {
 
+        int locationInformId = senLocationInformToBd(info);
+        int posInformId = senPosInform(info);
+        sendRmcToBd(info, locationInformId, posInformId);
+    }
 
+    private void sendRmcToBd(CSVLocalnfo info, int locationInformId, int posInformId) throws SQLException {
+        String sql = "INSERT INTO RMC (location_information_id, pos_inform_id, " +
+                " speed_over_ground) " +
+                "VALUES (?, ?, ?);";
 
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, locationInformId, Types.INTEGER);
+        ps.setObject(2, posInformId, Types.INTEGER);
+        ps.setObject(3, info.getSpeedOverGround(), Types.FLOAT);
 
+        ps.executeUpdate();
+    }
 
+    private int senPosInform(CSVLocalnfo info) throws SQLException {
+        String sql = "INSERT INTO pos_inform (latitude, longitude, address) " +
+                "VALUES (?, ?, ?) RETURNING pos_inform_id;";
 
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, info.getLatitude(), Types.FLOAT);
+        ps.setObject(2, info.getLongitude(), Types.FLOAT);
+        ps.setObject(3, info.getAddress(), Types.VARCHAR);
+
+        ResultSet result = ps.executeQuery();
+        result.next();
+        return result.getInt(1);
+    }
+
+    private int senLocationInformToBd(CSVLocalnfo info) throws SQLException {
+        String sql = "INSERT INTO location_information (device_id, UTC_date, date_of_locate) " +
+                "VALUES (?, ?, ?) RETURNING location_information_id;";
+        PreparedStatement ps = connection.prepareStatement(sql);
+
+        ps.setInt(1, 1);
+        ps.setFloat(2, info.getTimeUTC());
+        ps.setDate(3, info.getDate());
+        ResultSet result = ps.executeQuery();
+        result.next();
+
+        int locationInformId = result.getInt(1);
+        return locationInformId;
+    }
+
+    private ResultSet getResultSetGSVinf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT UTC_date, " + " date_of_locate, " + " satellite_id, " + " azimuth, " + " elevation, " +
+                "       snr_c_no " + "FROM gsv " + "  JOIN location_information USING (location_information_id) " +
+                "ORDER BY  UTC_date;";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+        return set;
+    }
+
+    public List<List<String>> getGSV_inf() throws SQLException {
+        ResultSet set = getResultSetGSVinf();
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(Integer.toString(set.getInt("satellite_id")));
+            str.add(Integer.toString(set.getInt("elevation")));
+            str.add(Integer.toString(set.getInt("azimuth")));
+            str.add(Integer.toString(set.getInt("snr_c_no")));
+
+            table.add(str);
+        }
+
+        return table;
+    }
+
+    public List<List<String>> getCSV_inf() throws SQLException {
+        ResultSet set = getResultSetCSVinf();
+
+        List<List<String>> table = new ArrayList<>();
+        while (set.next()) {
+            var str = new ArrayList<String>();
+            str.add(set.getDate("date_of_locate").toString());
+            str.add(Float.toString(set.getFloat("UTC_date")));
+            str.add(Float.toString(set.getFloat("speed_over_ground")));
+            str.add(Float.toString(set.getFloat("latitude")));
+            str.add(Float.toString(set.getFloat("longitude")));
+            str.add(set.getString("address"));
+
+            table.add(str);
+        }
+
+        return table;
+    }
+
+    private ResultSet getResultSetCSVinf() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT date_of_locate, "
+                + " UTC_date, "
+                + " speed_over_ground, "
+                + " latitude, "
+                + " longitude, " +
+                "   address " +
+                "FROM RMC " +
+                "  JOIN location_information USING (location_information_id) " +
+                "JOIN pos_inform USING(pos_inform_id) " +
+                "ORDER BY date_of_locate, UTC_date";
+
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+        return set;
     }
 }
 

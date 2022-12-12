@@ -40,7 +40,7 @@ public class CSVLocalnfo {
 
     public void setLatitude(String latitude) {
         if (latitude.equals("")) return;
-        this.latitude = strToDegree(latitude);
+        this.latitude = Double.parseDouble(latitude);
     }
 
     public Double getLongitude() {
@@ -49,7 +49,7 @@ public class CSVLocalnfo {
 
     public void setLongitude(String longitude) {
         if (longitude.equals("")) return;
-        this.longitude = strToDegree(longitude);
+        this.longitude = Double.parseDouble(longitude);
     }
 
     public Double getSpeedOverGround() {
@@ -71,15 +71,15 @@ public class CSVLocalnfo {
 
     }
 
-    private double strToDegree(String value) {
-        if ("".equals(value))
-            return 0;
-
-        double latitudeInDegrees = Math.round((Double.parseDouble(value) / 100));
-        latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
-        //System.out.println("градусы = " + latitudeInDegrees);
-        return latitudeInDegrees ;
-    }
+//    private double strToDegree(String value) {
+//        if ("".equals(value))
+//            return 0;
+//
+//        double latitudeInDegrees = Math.round((Double.parseDouble(value) / 100));
+//        latitudeInDegrees += (Double.parseDouble(value) % 100) / 60;
+//        //System.out.println("градусы = " + latitudeInDegrees);
+//        return latitudeInDegrees ;
+//    }
 
 
 }

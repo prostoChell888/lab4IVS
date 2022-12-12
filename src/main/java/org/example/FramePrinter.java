@@ -60,7 +60,7 @@ public class FramePrinter {
 
         jToolBar.add(new JButton("Таблица"));
         jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
-        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
+       // jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
 
         JPanel jPanel = new JPanel();
@@ -79,7 +79,6 @@ public class FramePrinter {
 
         frame.revalidate();
         frame.repaint();
-
     }
 
 

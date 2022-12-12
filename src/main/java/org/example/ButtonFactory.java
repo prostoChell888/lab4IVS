@@ -39,7 +39,7 @@ public class ButtonFactory {
                 //dbConector.addInfoFromRafFile(holderFirstFile.file); //todo раскоментировать
                 dbConector.addIfoFromCSVFile(holderFirstFile.file);
                 System.out.println("все ок");
-                FramePrinter.printNewTableWindow(frame, dbConector, getGGA_table(dbConector), "GGA");
+                FramePrinter.printNewTableWindow(frame, dbConector, getCSV_table(dbConector), "GGA");
             } catch (Exception e) {
                 try {
                     if (holderFirstFile.file == null) {
@@ -56,6 +56,8 @@ public class ButtonFactory {
 
         return jButton;
     }
+
+
 
 
     public static JButton createButtonChooseFile(JLabel jl, FilesHolder files) {
@@ -153,6 +155,18 @@ public class ButtonFactory {
                 "Используемы\n спутники", "Горизонтальное\n разбавление\n точности", "Units"
         };
         List<List<String>> data = connector.getGGA_inf();
+
+        return getJTable(data, header);
+    }
+
+    private static JTable getCSV_table(DBCConnector connector) {
+        String[] header = {"Дата", "Время ч.", "Скорость км/ч", "Долгота гр.", "Широта гр.", "Положение"};
+        List<List<String>> data;
+        try {
+            data = connector.getCSV_inf();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         return getJTable(data, header);
     }
