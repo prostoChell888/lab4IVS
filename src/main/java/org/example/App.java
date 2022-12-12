@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class App extends JFrame {
 
 
-    public App() throws Exception {
+    public App() throws Throwable {
         super("ИВС");
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -22,12 +22,14 @@ public class App extends JFrame {
 
         super.addWindowListener(new WindowListener() {
 
-            public void windowActivated(WindowEvent event) {}
+            public void windowActivated(WindowEvent event) {
+            }
 
-            public void windowClosed(WindowEvent event) {}
+            public void windowClosed(WindowEvent event) {
+            }
 
             public void windowClosing(WindowEvent event) {
-                Object[] options = { "Да", "Нет" };
+                Object[] options = {"Да", "Нет"};
                 int n = JOptionPane
                         .showOptionDialog(event.getWindow(), "Сохранинеть загруженные файлы?",
                                 "Подтверждение", JOptionPane.YES_NO_OPTION,
@@ -46,15 +48,23 @@ public class App extends JFrame {
                 System.exit(0);
             }
 
-            public void windowDeactivated(WindowEvent event) {}
+            public void windowDeactivated(WindowEvent event) {
+            }
 
-            public void windowDeiconified(WindowEvent event) {}
+            public void windowDeiconified(WindowEvent event) {
+            }
 
-            public void windowIconified(WindowEvent event) {}
+            public void windowIconified(WindowEvent event) {
+            }
 
-            public void windowOpened(WindowEvent event) {}
+            public void windowOpened(WindowEvent event) {
+            }
 
         });
-        FramePrinter.printDownloudWindow(this, "файл не выбран", dbConector);
+        if (dbConector.isAvailabilityOfData()) {
+            FramePrinter.printNewTableWindow(this, dbConector);
+        } else {
+            FramePrinter.printDownloudWindow(this, "файл не выбран", dbConector);
+        }
     }
 }

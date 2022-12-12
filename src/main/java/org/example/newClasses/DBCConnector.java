@@ -617,7 +617,7 @@ public class DBCConnector {
                 + " speed_over_ground, "
                 + " latitude, "
                 + " longitude, " +
-                "   COALESCE(address, 'unknown')" +
+                "   COALESCE(address, 'unknown') as address " +
                 "FROM RMC " +
                 "  JOIN location_information USING (location_information_id) " +
                 "JOIN pos_inform USING(pos_inform_id) " +
@@ -626,6 +626,21 @@ public class DBCConnector {
         Statement st = connection.createStatement();
         ResultSet set = st.executeQuery(sql);
         return set;
+    }
+
+    public boolean isAvailabilityOfData() throws SQLException {
+        /* language=SQL */
+        String sql = "SELECT count(location_information_id)" +
+                "FROM location_information ";
+        Statement st = connection.createStatement();
+        ResultSet set = st.executeQuery(sql);
+        set.next();
+
+        var res = set.getInt(1);
+
+        return res > 0;
+
+
     }
 }
 

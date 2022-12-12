@@ -39,7 +39,7 @@ public class ButtonFactory {
                 //dbConector.addInfoFromRafFile(holderFirstFile.file); //todo раскоментировать
                 dbConector.addIfoFromCSVFile(holderFirstFile.file);
                 System.out.println("все ок");
-                FramePrinter.printNewTableWindow(frame, dbConector, getCSV_table(dbConector), "GGA");
+                FramePrinter.printNewTableWindow(frame, dbConector, getCSV_table(dbConector));
             } catch (Exception e) {
                 try {
                     if (holderFirstFile.file == null) {
@@ -101,7 +101,7 @@ public class ButtonFactory {
         jButton.addActionListener(x -> {
             try {
                 FramePrinter.printNewTableWindow(frame, connector,
-                        getGGA_table(connector), "GGA");
+                        getGGA_table(connector));
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -111,43 +111,44 @@ public class ButtonFactory {
         return jButton;
     }
 
+//todo выбор данных из предложенных
 
-    public static JComboBox createFormatChoserButton(JFrame frame, DBCConnector connection, String defaultChoice) {
-        var choose = new String[]{"GGA", "RMC", "GSA", "GSV"};
-        JComboBox<String> comboBox = new JComboBox<>(choose);
-        comboBox.setSelectedItem(defaultChoice);
-
-        comboBox.addActionListener(al -> {
-            JComboBox box = (JComboBox) al.getSource();
-            String item = (String) box.getSelectedItem();
-
-            JTable jTable = new JTable();
-            try {
-                switch (Objects.requireNonNull(item)) {
-                    case "GGA":
-                        jTable = getGGA_table(connection);
-                        break;
-                    case "RMC":
-                        jTable = getRMC_table(connection);
-                        break;
-                    case "GSA":
-                        jTable = getGSA_table(connection);
-                        break;
-                    case "GSV":
-                        jTable = getGSV_table(connection);
-                        break;
-                }
-                FramePrinter.printNewTableWindow(frame, connection, jTable, item);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        });
-        Font font = new Font("Verdana", Font.PLAIN, 18);
-        comboBox.setFont(font);
-        comboBox.setAlignmentX(LEFT_ALIGNMENT);
-
-        return comboBox;
-    }
+//    public static JComboBox createFormatChoserButton(JFrame frame, DBCConnector connection, String defaultChoice) {
+//        var choose = new String[]{"GGA", "RMC", "GSA", "GSV"};
+//        JComboBox<String> comboBox = new JComboBox<>(choose);
+//        comboBox.setSelectedItem(defaultChoice);
+//
+//        comboBox.addActionListener(al -> {
+//            JComboBox box = (JComboBox) al.getSource();
+//            String item = (String) box.getSelectedItem();
+//
+//            JTable jTable = new JTable();
+//            try {
+//                switch (Objects.requireNonNull(item)) {
+//                    case "GGA":
+//                        jTable = getGGA_table(connection);
+//                        break;
+//                    case "RMC":
+//                        jTable = getRMC_table(connection);
+//                        break;
+//                    case "GSA":
+//                        jTable = getGSA_table(connection);
+//                        break;
+//                    case "GSV":
+//                        jTable = getGSV_table(connection);
+//                        break;
+//                }
+//                FramePrinter.printNewTableWindow(frame, connection, jTable, item);
+//            } catch (Throwable e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//        Font font = new Font("Verdana", Font.PLAIN, 18);
+//        comboBox.setFont(font);
+//        comboBox.setAlignmentX(LEFT_ALIGNMENT);
+//
+//        return comboBox;
+//    }
 
 
     private static JTable getGGA_table(DBCConnector connector) throws SQLException {
@@ -159,7 +160,7 @@ public class ButtonFactory {
         return getJTable(data, header);
     }
 
-    private static JTable getCSV_table(DBCConnector connector) {
+    public static JTable getCSV_table(DBCConnector connector) {
         String[] header = {"Дата", "Время ч.", "Скорость км/ч", "Долгота гр.", "Широта гр.", "Положение"};
         List<List<String>> data;
         try {
@@ -209,7 +210,7 @@ public class ButtonFactory {
     public static JComboBox<String> createComboBoxChooseAxis
             (JFrame frame, DBCConnector connection, NamesOfAxes namesOfAxes) {
 
-        String[] items = {"latitude", "longitude", "MSL_altitude"};
+        String[] items = {"долгота гр.", "широта гр.", "Скорость км/ч"};
         JComboBox<String> comboBox = new JComboBox<>(items);
 
         comboBox.setSelectedItem(namesOfAxes.getNameOfX());
@@ -220,7 +221,15 @@ public class ButtonFactory {
             String item = (String) box.getSelectedItem();
 
             namesOfAxes.setNameOfY(item);
-            namesOfAxes.setNameOfX("UTC_date");
+            namesOfAxes.setNameOfX("Время ч.");
+
+            switch (item) {
+                case "долгота гр.": item = "latitude"; break;
+                case "широта гр.": item = "longitude"; break;
+                case "Скорость км/ч": item = "speed_over_ground"; break;
+            }
+
+
 
             try {
                 List<Float> listXCord = connection.getLocationInf("UTC_date");
