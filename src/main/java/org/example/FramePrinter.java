@@ -89,11 +89,14 @@ public class FramePrinter {
         JPanel jPanelTime = getjPanelTime(jPanel, "начала");
         jPanel.add(jPanelTime);
 
+        jPanel.add(new JLabel("<html><br/><br/></html>"));
+
         JPanel jPanelDayOut2 = getjPaneldate("окончания");
         jPanel.add(jPanelDayOut2);
 
         JPanel jPanelTime2 = getjPanelTime(jPanel, "окончания");
         jPanel.add(jPanelTime2);
+        jPanel.add(new JLabel("<html><br/><br/></html>"));
 
         return jPanel;
     }
@@ -123,52 +126,7 @@ public class FramePrinter {
     }
 
 
-//    public static void printTableWindow(JFrame frame, List<Location> listWithCoordinates) throws Exception {
-//
-//        if (listWithCoordinates == null) {
-//            throw new Exception("Невозможно считать содерижиое файла");
-//        }
-//        Container container = frame.getContentPane();
-//        container.removeAll();
-//        container.setLayout(new BorderLayout());
-//
-//        frame.setResizable(true);
-//        frame.setSize(1300, 700);
-//
-//        JTable table  = new JTable(); // = getjTable(listWithCoordinates);
-//        JScrollPane scrollPane = new JScrollPane(table);
-//        container.add(scrollPane, BorderLayout.CENTER);
-//
-//
-//        List<Double> listXAxis = new ArrayList<>();
-//        List<Double> listYAxis = new ArrayList<>();
-//
-//        StringBuilder nameOfXAxis = new StringBuilder();
-//        StringBuilder nameOfYAxis = new StringBuilder();
-//        JComboBox boxAxisX = ButtonFactory.createComboBoxChooseAxis(listXAxis, listWithCoordinates, nameOfXAxis);
-//        JComboBox boxAxisY = ButtonFactory.createComboBoxChooseAxis(listYAxis, listWithCoordinates, nameOfYAxis);
-//
-//        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
-//
-//        JButton graphButton = ButtonFactory.createGraphButton(frame, listXAxis, listYAxis, nameOfXAxis, nameOfYAxis, listWithCoordinates);
-//
-//
-//
-//        JPanel grid = new JPanel(new GridLayout(6, 1, 0, 5));
-//
-//        grid.add(loadFileButton);
-//        grid.add(new Label("Ось X"));
-//        grid.add(boxAxisX);
-//        grid.add(new Label("Ось Y"));
-//        grid.add(boxAxisY);
-//        grid.add(graphButton);
-//
-//
-//        container.add(grid, BorderLayout.WEST);
-//        frame.revalidate();
-//        frame.repaint();
-//
-//    }
+
 
     public static void printNewGraphWindow(JFrame frame, DBCConnector connector,
                                            XYDataset dataset, NamesOfAxes namesOfAxes) throws Throwable {
@@ -184,7 +142,6 @@ public class FramePrinter {
 
         jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
         jToolBar.add(ButtonFactory.createNewRouteButton(frame, connector));
-        jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
         jToolBar.add(new JButton("Графики"));
 
         JPanel jPanel = getjPanelCHooseTime();
@@ -209,41 +166,6 @@ public class FramePrinter {
     }
 
 
-//    public static void printGraphWindow
-//            (JFrame frame, List<Double> listXAxis,
-//             List<Double> listYAxis, StringBuilder nameOfXAxis,
-//             StringBuilder nameOfYAxis, List<Location> listWithCoordinates) {
-//        Container container = frame.getContentPane();
-//        container.removeAll();
-//        container.setLayout(new BorderLayout());
-//
-//        XYDataset dataset = createDatasetForSpeedWithTime(listXAxis, listYAxis);
-//
-//        JFreeChart chart = ChartFactory.createScatterPlot(
-//                "График зависимости",
-//                nameOfXAxis.toString(),//x
-//                nameOfYAxis.toString(),//y
-//                dataset);
-//        XYPlot plot = (XYPlot) chart.getPlot();
-//        plot.setBackgroundPaint(new Color(196, 217, 255));
-//
-//        ChartPanel panel = new ChartPanel(chart);
-//        container.add(panel, BorderLayout.CENTER);
-//
-//        JPanel grid = new JPanel(new GridLayout(2, 1, 0, 5));
-//
-//        JButton loadFileButton = ButtonFactory.createLoadFileButton(frame);
-//        JButton tableBitton = ButtonFactory.createTable(frame, listWithCoordinates);
-//
-//        grid.add(loadFileButton);
-//        grid.add(tableBitton);
-//        container.add(grid, BorderLayout.WEST);
-//
-//
-//        frame.revalidate();
-//        frame.repaint();
-//
-//    }
 
     private static XYDataset createDatasetForSpeedWithTime
             (List<Double> listXAxis, List<Double> listYAxis) {
@@ -297,18 +219,21 @@ public class FramePrinter {
 
         jToolBar.add(ButtonFactory.creteNewTablesButton(frame, connector));
         jToolBar.add(new JButton("Маршрут"));
-        jToolBar.add(ButtonFactory.createNewSkyPlotButton(frame, connector));
+
         jToolBar.add(ButtonFactory.createNewGraphbutton(frame, connector));
 
 
         JFreeChart chart = ChartFactory.createScatterPlot(
                 "Маршрут",
-                "latitude",//x
-                "longitude",//y
+                "долгота",//x
+                "широта",//y
                 dataset);
 
         ChartPanel panel = new ChartPanel(chart);
         container.add(panel, BorderLayout.CENTER);
+
+        JPanel jPanel = getjPanelCHooseTime();
+        container.add(jPanel, BorderLayout.WEST);
 
         //container.add(new ChartPanel(chart), BorderLayout.CENTER);
 
