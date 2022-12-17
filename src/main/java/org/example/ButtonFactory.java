@@ -145,7 +145,11 @@ public class ButtonFactory {
         };
         List<List<String>> data = connector.getGGA_inf(device_id);
 
-        return getJTable(data, header);
+        var table = getJTable(data, header);
+
+        table.setFont(new Font("Serif", Font.BOLD, 20));
+
+        return table;
     }
 
     private static JTable getRMC_table(DBCConnector connector) throws SQLException {
